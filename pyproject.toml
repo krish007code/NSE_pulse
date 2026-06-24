@@ -1,0 +1,23 @@
+[project]
+name = "nse-pulse"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "clickhouse-connect>=1.3.0",
+    "cryptography>=49.0.0",
+    "dbt-clickhouse>=1.10.0",
+    "minio>=7.2.20",
+    "polars>=1.41.2",
+    "pyarrow>=24.0.0",
+    "tqdm>=4.68.2",
+    "yfinance>=1.4.1",
+]
+
+[dependency-groups]
+dev = [
+    "apache-airflow>=3.2.2",
+    "cryptography>=49.0.0",
+    "fernet>=1.0.1",
+]

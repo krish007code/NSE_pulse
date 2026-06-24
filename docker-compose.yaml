@@ -1,0 +1,136 @@
+name: nse_pulse
+
+x-airflow-common: &airflow-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  env_file: .env 
+  environment:
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${USER1}:${PWD1}@postgres:5432/nse_pulse_DB
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__FERNET_KEY: ${FERNET_KEY}
+  depends_on:
+    postgres:
+      condition: service_started
+  networks:
+    - nse_pulse_network
+
+services:
+
+  dbt:
+      build:
+        context: .
+        dockerfile: dockerfile.dbt
+      container_name: dbt
+      user: "1000:1000"
+      environment:
+        - HOME=/dbt 
+      volumes:
+        - ./dbt_project:/dbt
+      networks:
+        - nse_pulse_network
+      depends_on:
+        - clickhouse
+      command: sleep infinity
+      
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${USER1}
+      POSTGRES_PASSWORD: ${PWD1}
+      POSTGRES_DB: "nse_pulse_DB"
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - nse_pulse_network
+    ports:
+      - "5433:5432"
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.1
+    container_name: clickhouse
+    networks:
+      - nse_pulse_network
+    ports:
+      - "8123:8123"
+      - "9005:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    environment:
+      CLICKHOUSE_DB: analytics
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${USER1}
+      MINIO_ROOT_PASSWORD: ${PWD1}
+    volumes:
+      - minio_data:/data
+    networks:
+      - nse_pulse_network
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow-init
+    command: >
+      bash -c "
+      airflow db migrate &&
+      airflow users create 
+      --username ${USER1} 
+      --password ${PWD1} 
+      --firstname Krish 
+      --lastname Dev 
+      --role Admin 
+      --email kavyanshkumarbaghel@gmail.com
+      "
+
+  webserver:
+    <<: *airflow-common
+    container_name: webserver
+    command: webserver
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./scripts:/opt/airflow/scripts
+      - ./dbt_project:/opt/airflow/dbt_project
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_started
+      airflow-init:
+        condition: service_completed_successfully
+
+  scheduler:
+    <<: *airflow-common
+    container_name: scheduler
+    command: scheduler
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./scripts:/opt/airflow/scripts
+      - ./dbt_project:/opt/airflow/dbt_project
+    depends_on:
+      postgres:
+        condition: service_started
+      airflow-init:
+        condition: service_completed_successfully
+
+volumes:
+  postgres_data:
+  minio_data:
+  clickhouse_data:
+
+networks:
+  nse_pulse_network:
+    driver: bridge
