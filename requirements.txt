@@ -1,0 +1,6 @@
+polars
+yfinance
+minio
+clickhouse-connect
+python-dotenv
+tqdm
