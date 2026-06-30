@@ -1,3 +1,12 @@
 FROM python:3.13-slim
 WORKDIR /dbt
-RUN pip install dbt-core dbt-clickhouse
+
+# 1. Update the package manager and install git
+# The rm -rf command cleans up the cache to keep the container small
+RUN apt-get update && \
+    apt-get install -y git && \
+    rm -rf /var/lib/apt/lists/*
+
+# 2. Install dbt and the ClickHouse adapter
+# --no-cache-dir prevents pip from saving downloaded packages, saving space
+RUN pip install --no-cache-dir dbt-core dbt-clickhouse

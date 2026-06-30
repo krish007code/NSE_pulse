@@ -1,0 +1,7 @@
+version: 2
+sources:
+  - name: raw_nse
+    database: bronze
+    tables:
+      - name: ohlcv
+        description: "Raw daily OHLCV data loaded from MinIO parquet files"
