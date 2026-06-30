@@ -9,21 +9,21 @@ import pendulum
 )
 def nse_pipeline():
 
-    @task()
+    @task
     def ingest():
         import sys
         sys.path.append('/opt/airflow/scripts')
         from ingest import daily_load
         daily_load()
 
-    @task()
+    @task
     def upload():
         import sys
         sys.path.append('/opt/airflow/scripts')
         from upload_minio import daily
         daily()
 
-    @task()
+    @task
     def load():
         import sys
         sys.path.append('/opt/airflow/scripts')

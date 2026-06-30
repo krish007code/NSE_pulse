@@ -1,52 +1,13 @@
-[0m13:03:32.557823 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fee5c30a510>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fee5f06ec10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fee5b1bfb10>]}
+[0m21:43:46.057805 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f5f860b6660>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f5f88ffec10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f5f85147b10>]}
 
 
-============================== 13:03:32.589117 | 235095f9-efb8-4ca0-bab1-f91b1d1db05d ==============================
-[0m13:03:32.589117 [info ] [MainThread]: Running with dbt=1.11.11
-[0m13:03:32.590524 [debug] [MainThread]: running dbt with arguments {'send_anonymous_usage_stats': 'True', 'empty': 'None', 'introspect': 'True', 'version_check': 'True', 'log_path': 'logs', 'fail_fast': 'False', 'warn_error': 'None', 'debug': 'False', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'log_format': 'default', 'quiet': 'False', 'printer_width': '80', 'static_parser': 'True', 'use_colors': 'True', 'write_json': 'True', 'no_print': 'None', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'use_experimental_parser': 'False', 'profiles_dir': '/.dbt', 'target_path': 'None', 'invocation_command': 'dbt init nse_pulse_dbt', 'indirect_selection': 'eager'}
-[0m13:03:32.628172 [info ] [MainThread]: Creating dbt configuration folder at /.dbt
-[0m13:03:32.629342 [error] [MainThread]: Encountered an error:
-[Errno 13] Permission denied: '/.dbt'
-[0m13:03:32.638333 [error] [MainThread]: Traceback (most recent call last):
-  File "/usr/local/lib/python3.13/site-packages/dbt/cli/requires.py", line 182, in wrapper
-    result, success = func(*args, **kwargs)
-                      ~~~~^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.13/site-packages/dbt/cli/requires.py", line 128, in wrapper
-    return func(*args, **kwargs)
-  File "/usr/local/lib/python3.13/site-packages/dbt/cli/main.py", line 488, in init
-    results = task.run()
-  File "/usr/local/lib/python3.13/site-packages/dbt/task/init.py", line 300, in run
-    self.create_profiles_dir(profiles_dir)
-    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.13/site-packages/dbt/task/init.py", line 69, in create_profiles_dir
-    dbt_common.clients.system.make_directory(profiles_dir)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.13/functools.py", line 934, in wrapper
-    return dispatch(args[0].__class__)(*args, **kw)
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.13/site-packages/dbt_common/clients/system.py", line 219, in _
-    path.mkdir(parents=True, exist_ok=True)
-    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.13/pathlib/_local.py", line 722, in mkdir
-    os.mkdir(self, mode)
-    ~~~~~~~~^^^^^^^^^^^^
-PermissionError: [Errno 13] Permission denied: '/.dbt'
-
-[0m13:03:32.641644 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": false, "command_wall_clock_time": 0.22133619, "process_in_blocks": "42528", "process_kernel_time": 0.4424, "process_mem_max_rss": "107160", "process_out_blocks": "72", "process_user_time": 3.651342}
-[0m13:03:32.642902 [debug] [MainThread]: Command `dbt init` failed at 13:03:32.642585 after 0.22 seconds
-[0m13:03:32.643789 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fee5b18e9e0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fee5b11c050>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fee5b29a8b0>]}
-[0m13:03:32.644699 [debug] [MainThread]: Flushing usage events
-[0m13:03:34.321469 [debug] [MainThread]: An error was encountered while trying to flush usage events
-[0m16:29:59.216844 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f384b8a6510>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f384e60ac10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f384a75bb10>]}
-
-
-============================== 16:29:59.222622 | fdc0de4f-f8bf-46ab-8da7-76ae4c93edbc ==============================
-[0m16:29:59.222622 [info ] [MainThread]: Running with dbt=1.11.11
-[0m16:29:59.222930 [debug] [MainThread]: running dbt with arguments {'log_path': 'logs', 'cache_selected_only': 'False', 'partial_parse': 'True', 'use_experimental_parser': 'False', 'quiet': 'False', 'log_format': 'default', 'use_colors': 'True', 'write_json': 'True', 'no_print': 'None', 'printer_width': '80', 'warn_error': 'None', 'profiles_dir': '/dbt/.dbt', 'invocation_command': 'dbt init NSE_pulse_dbt', 'log_cache_events': 'False', 'send_anonymous_usage_stats': 'True', 'target_path': 'None', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'version_check': 'True', 'empty': 'None', 'fail_fast': 'False', 'indirect_selection': 'eager', 'introspect': 'True', 'debug': 'False', 'static_parser': 'True'}
-[0m16:29:59.231898 [info ] [MainThread]: Creating dbt configuration folder at /dbt/.dbt
-[0m16:29:59.233210 [debug] [MainThread]: Starter project path: /usr/local/lib/python3.13/site-packages/dbt/include/starter_project
-[0m16:29:59.235674 [info ] [MainThread]: 
-Your new dbt project "NSE_pulse_dbt" was created!
+============================== 21:43:46.064684 | 947f5e09-fce4-46d2-bfb2-e20e50feb5ac ==============================
+[0m21:43:46.064684 [info ] [MainThread]: Running with dbt=1.11.11
+[0m21:43:46.064980 [debug] [MainThread]: running dbt with arguments {'target_path': 'None', 'indirect_selection': 'eager', 'profiles_dir': '/dbt/.dbt', 'invocation_command': 'dbt init nse_pulse_dbt', 'empty': 'None', 'log_cache_events': 'False', 'no_print': 'None', 'use_colors': 'True', 'warn_error': 'None', 'introspect': 'True', 'static_parser': 'True', 'quiet': 'False', 'log_path': 'logs', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'write_json': 'True', 'cache_selected_only': 'False', 'send_anonymous_usage_stats': 'True', 'log_format': 'default', 'partial_parse': 'True', 'debug': 'False', 'fail_fast': 'False', 'use_experimental_parser': 'False', 'version_check': 'True', 'printer_width': '80'}
+[0m21:43:46.072019 [info ] [MainThread]: Creating dbt configuration folder at /dbt/.dbt
+[0m21:43:46.072757 [debug] [MainThread]: Starter project path: /usr/local/lib/python3.13/site-packages/dbt/include/starter_project
+[0m21:43:46.073954 [info ] [MainThread]: 
+Your new dbt project "nse_pulse_dbt" was created!
 
 For more information on how to configure the profiles.yml file,
 please consult the dbt documentation here:
@@ -61,10 +22,118 @@ Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
 
 Happy modeling!
 
-[0m16:29:59.236131 [info ] [MainThread]: Setting up your profile.
-[0m16:30:02.747891 [info ] [MainThread]: No sample profile found for clickhouse.
-[0m16:30:02.750018 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": true, "command_wall_clock_time": 3.5740144, "process_in_blocks": "49072", "process_kernel_time": 0.130096, "process_mem_max_rss": "106968", "process_out_blocks": "232", "process_user_time": 1.0958}
-[0m16:30:02.750416 [debug] [MainThread]: Command `dbt init` succeeded at 16:30:02.750310 after 3.57 seconds
-[0m16:30:02.750681 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f384a610510>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f384a6bb2f0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f384a6bd6a0>]}
-[0m16:30:02.750891 [debug] [MainThread]: Flushing usage events
-[0m16:30:05.384747 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m21:43:46.074147 [info ] [MainThread]: Setting up your profile.
+[0m21:43:48.134237 [info ] [MainThread]: No sample profile found for clickhouse.
+[0m21:43:48.136792 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": true, "command_wall_clock_time": 2.1147208, "process_in_blocks": "408", "process_kernel_time": 0.044506, "process_mem_max_rss": "107236", "process_out_blocks": "160", "process_user_time": 0.96772}
+[0m21:43:48.137161 [debug] [MainThread]: Command `dbt init` succeeded at 21:43:48.137080 after 2.12 seconds
+[0m21:43:48.137351 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f5f85008510>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f5f850c7890>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f5f850b1590>]}
+[0m21:43:48.137548 [debug] [MainThread]: Flushing usage events
+[0m21:43:49.643750 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m21:46:48.802370 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f51db3fe660>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f51de176c10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f51da2c0050>]}
+
+
+============================== 21:46:48.806854 | 75f5ef79-cbe1-4704-8f47-6a0d63e184ce ==============================
+[0m21:46:48.806854 [info ] [MainThread]: Running with dbt=1.11.11
+[0m21:46:48.807123 [debug] [MainThread]: running dbt with arguments {'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'printer_width': '80', 'indirect_selection': 'eager', 'introspect': 'True', 'cache_selected_only': 'False', 'log_format': 'default', 'warn_error': 'None', 'partial_parse': 'True', 'use_colors': 'True', 'debug': 'False', 'log_path': 'logs', 'use_experimental_parser': 'False', 'invocation_command': 'dbt debug', 'no_print': 'None', 'fail_fast': 'False', 'version_check': 'True', 'write_json': 'True', 'profiles_dir': '/dbt/.dbt', 'static_parser': 'True', 'send_anonymous_usage_stats': 'True', 'log_cache_events': 'False', 'target_path': 'None', 'empty': 'None', 'quiet': 'False'}
+[0m21:46:48.813917 [info ] [MainThread]: dbt version: 1.11.11
+[0m21:46:48.814209 [info ] [MainThread]: python version: 3.13.14
+[0m21:46:48.814357 [info ] [MainThread]: python path: /usr/local/bin/python3.13
+[0m21:46:48.814503 [info ] [MainThread]: os info: Linux-6.19.10-300.fc44.x86_64-x86_64-with-glibc2.41
+[0m21:46:48.814827 [error] [MainThread]: Encountered an error:
+cannot access local variable 'summary_message' where it is not associated with a value
+[0m21:46:48.817989 [error] [MainThread]: Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/site-packages/dbt/cli/requires.py", line 182, in wrapper
+    result, success = func(*args, **kwargs)
+                      ~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/site-packages/dbt/cli/requires.py", line 128, in wrapper
+    return func(*args, **kwargs)
+  File "/usr/local/lib/python3.13/site-packages/dbt/cli/main.py", line 425, in debug
+    results = task.run()
+  File "/usr/local/lib/python3.13/site-packages/dbt/task/debug.py", line 114, in run
+    load_profile_status: SubtaskStatus = self._load_profile()
+                                         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/dbt/task/debug.py", line 201, in _load_profile
+    profile_names, summary_message = self._choose_profile_names()
+                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/dbt/task/debug.py", line 276, in _choose_profile_names
+    return profiles, summary_message
+                     ^^^^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'summary_message' where it is not associated with a value
+
+[0m21:46:48.819393 [debug] [MainThread]: Resource report: {"command_name": "debug", "command_success": false, "command_wall_clock_time": 0.018474773, "process_in_blocks": "72", "process_kernel_time": 0.058549, "process_mem_max_rss": "106436", "process_out_blocks": "152", "process_user_time": 0.895858}
+[0m21:46:48.820292 [debug] [MainThread]: Command `dbt debug` failed at 21:46:48.820239 after 0.02 seconds
+[0m21:46:48.820485 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f51da2502b0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f51da4f2b10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f51da41b460>]}
+[0m21:46:48.820709 [debug] [MainThread]: Flushing usage events
+[0m21:46:50.155792 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m21:47:07.958116 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f4511066660>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f4513fbec10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f45100fc050>]}
+
+
+============================== 21:47:07.964900 | 3c306dc9-b458-45b1-8057-b8691b365552 ==============================
+[0m21:47:07.964900 [info ] [MainThread]: Running with dbt=1.11.11
+[0m21:47:07.965388 [debug] [MainThread]: running dbt with arguments {'target_path': 'None', 'fail_fast': 'False', 'use_experimental_parser': 'False', 'write_json': 'True', 'log_format': 'default', 'no_print': 'None', 'printer_width': '80', 'log_cache_events': 'False', 'profiles_dir': '/dbt/.dbt', 'use_colors': 'True', 'log_path': 'logs', 'debug': 'False', 'partial_parse': 'True', 'indirect_selection': 'eager', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'cache_selected_only': 'False', 'invocation_command': 'dbt debug', 'quiet': 'False', 'warn_error': 'None', 'empty': 'None', 'static_parser': 'True', 'version_check': 'True', 'introspect': 'True', 'send_anonymous_usage_stats': 'True'}
+[0m21:47:07.971962 [info ] [MainThread]: dbt version: 1.11.11
+[0m21:47:07.972178 [info ] [MainThread]: python version: 3.13.14
+[0m21:47:07.972339 [info ] [MainThread]: python path: /usr/local/bin/python3.13
+[0m21:47:07.972471 [info ] [MainThread]: os info: Linux-6.19.10-300.fc44.x86_64-x86_64-with-glibc2.41
+[0m21:47:07.972735 [error] [MainThread]: Encountered an error:
+cannot access local variable 'summary_message' where it is not associated with a value
+[0m21:47:07.973642 [error] [MainThread]: Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/site-packages/dbt/cli/requires.py", line 182, in wrapper
+    result, success = func(*args, **kwargs)
+                      ~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/site-packages/dbt/cli/requires.py", line 128, in wrapper
+    return func(*args, **kwargs)
+  File "/usr/local/lib/python3.13/site-packages/dbt/cli/main.py", line 425, in debug
+    results = task.run()
+  File "/usr/local/lib/python3.13/site-packages/dbt/task/debug.py", line 114, in run
+    load_profile_status: SubtaskStatus = self._load_profile()
+                                         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/dbt/task/debug.py", line 201, in _load_profile
+    profile_names, summary_message = self._choose_profile_names()
+                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/dbt/task/debug.py", line 276, in _choose_profile_names
+    return profiles, summary_message
+                     ^^^^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'summary_message' where it is not associated with a value
+
+[0m21:47:07.974443 [debug] [MainThread]: Resource report: {"command_name": "debug", "command_success": false, "command_wall_clock_time": 0.017713968, "process_in_blocks": "0", "process_kernel_time": 0.053162, "process_mem_max_rss": "106508", "process_out_blocks": "8", "process_user_time": 0.900264}
+[0m21:47:07.974924 [debug] [MainThread]: Command `dbt debug` failed at 21:47:07.974789 after 0.02 seconds
+[0m21:47:07.975285 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f45100982b0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f451031eb10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f4510203460>]}
+[0m21:47:07.975652 [debug] [MainThread]: Flushing usage events
+[0m21:47:09.209585 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m21:58:24.272413 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f7386846660>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f7389772c10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f73858cc050>]}
+
+
+============================== 21:58:24.279971 | cdc215d6-d6f7-48da-a036-9a985cad6467 ==============================
+[0m21:58:24.279971 [info ] [MainThread]: Running with dbt=1.11.11
+[0m21:58:24.280303 [debug] [MainThread]: running dbt with arguments {'use_experimental_parser': 'False', 'quiet': 'False', 'log_format': 'default', 'invocation_command': 'dbt debug', 'no_print': 'None', 'use_colors': 'True', 'profiles_dir': '/dbt/.dbt', 'log_path': 'logs', 'debug': 'False', 'empty': 'None', 'cache_selected_only': 'False', 'target_path': 'None', 'version_check': 'True', 'write_json': 'True', 'static_parser': 'True', 'introspect': 'True', 'log_cache_events': 'False', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'partial_parse': 'True', 'warn_error': 'None', 'indirect_selection': 'eager', 'fail_fast': 'False', 'send_anonymous_usage_stats': 'True', 'printer_width': '80'}
+[0m21:58:24.285600 [info ] [MainThread]: dbt version: 1.11.11
+[0m21:58:24.285812 [info ] [MainThread]: python version: 3.13.14
+[0m21:58:24.285970 [info ] [MainThread]: python path: /usr/local/bin/python3.13
+[0m21:58:24.286109 [info ] [MainThread]: os info: Linux-6.19.10-300.fc44.x86_64-x86_64-with-glibc2.41
+[0m21:58:24.286374 [error] [MainThread]: Encountered an error:
+cannot access local variable 'summary_message' where it is not associated with a value
+[0m21:58:24.287297 [error] [MainThread]: Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/site-packages/dbt/cli/requires.py", line 182, in wrapper
+    result, success = func(*args, **kwargs)
+                      ~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/site-packages/dbt/cli/requires.py", line 128, in wrapper
+    return func(*args, **kwargs)
+  File "/usr/local/lib/python3.13/site-packages/dbt/cli/main.py", line 425, in debug
+    results = task.run()
+  File "/usr/local/lib/python3.13/site-packages/dbt/task/debug.py", line 114, in run
+    load_profile_status: SubtaskStatus = self._load_profile()
+                                         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/dbt/task/debug.py", line 201, in _load_profile
+    profile_names, summary_message = self._choose_profile_names()
+                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/dbt/task/debug.py", line 276, in _choose_profile_names
+    return profiles, summary_message
+                     ^^^^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'summary_message' where it is not associated with a value
+
+[0m21:58:24.288703 [debug] [MainThread]: Resource report: {"command_name": "debug", "command_success": false, "command_wall_clock_time": 0.017798783, "process_in_blocks": "1832", "process_kernel_time": 0.069091, "process_mem_max_rss": "106376", "process_out_blocks": "16", "process_user_time": 0.929464}
+[0m21:58:24.289001 [debug] [MainThread]: Command `dbt debug` failed at 21:58:24.288938 after 0.02 seconds
+[0m21:58:24.289206 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f73858742b0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f7385a06b10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f73859d7460>]}
+[0m21:58:24.289421 [debug] [MainThread]: Flushing usage events
+[0m21:58:25.416427 [debug] [MainThread]: An error was encountered while trying to flush usage events

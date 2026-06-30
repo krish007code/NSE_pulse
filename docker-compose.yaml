@@ -125,6 +125,16 @@ services:
         condition: service_started
       airflow-init:
         condition: service_completed_successfully
+  
+  metabase:
+    image: metabase/metabase:latest
+    container_name: metabase
+    ports:
+      - "3000:3000"
+    networks:
+      - nse_pulse_network
+    depends_on:
+      - clickhouse
 
 volumes:
   postgres_data:
