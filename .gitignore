@@ -8,3 +8,4 @@ wheels/
 
 # Virtual environments
 .venv
+dbt_project/.vscode-server/
