@@ -1,0 +1,14 @@
+{
+  "socketPath": "/tmp/mcp-ZYP6Aa/mcp.sock",
+  "scheme": "unix",
+  "headers": {
+    "Authorization": "Nonce 9275c35f-ca56-40e2-99d6-1f83f5cfb692"
+  },
+  "pid": 3799,
+  "ideName": "Visual Studio Code",
+  "timestamp": 1783837268225,
+  "workspaceFolders": [
+    "/dbt/nse_pulse_dbt"
+  ],
+  "isTrusted": true
+}
