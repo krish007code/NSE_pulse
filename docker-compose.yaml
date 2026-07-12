@@ -3,7 +3,7 @@ name: nse_pulse
 x-airflow-common: &airflow-common
   build:
     context: .
-    dockerfile: Dockerfile
+    dockerfile: dockerfile.airflow
   env_file: .env 
   environment:
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${USER1}:${PWD1}@postgres:5432/nse_pulse_DB
@@ -135,11 +135,14 @@ services:
       - nse_pulse_network
     depends_on:
       - clickhouse
+    volumes:
+      - metabase_data:/metabase-data
 
 volumes:
   postgres_data:
   minio_data:
   clickhouse_data:
+  metabase_data:
 
 networks:
   nse_pulse_network:
