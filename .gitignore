@@ -9,3 +9,8 @@ wheels/
 # Virtual environments
 .venv
 dbt_project/.vscode-server/scripts/.autocommit/
+
+# secrets_auto
+.env
+scripts/.autocommit
+scripts/auto_commit_marts.sh
