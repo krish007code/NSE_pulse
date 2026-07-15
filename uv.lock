@@ -1652,6 +1652,7 @@ dependencies = [
     { name = "cryptography" },
     { name = "dbt-clickhouse" },
     { name = "minio" },
+    { name = "pathlib" },
     { name = "polars" },
     { name = "pyarrow" },
     { name = "tqdm" },
@@ -1671,6 +1672,7 @@ requires-dist = [
     { name = "cryptography", specifier = ">=49.0.0" },
     { name = "dbt-clickhouse", specifier = ">=1.10.0" },
     { name = "minio", specifier = ">=7.2.20" },
+    { name = "pathlib", specifier = ">=1.0.1" },
     { name = "polars", specifier = ">=1.41.2" },
     { name = "pyarrow", specifier = ">=24.0.0" },
     { name = "tqdm", specifier = ">=4.68.2" },
@@ -1927,6 +1929,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a8/20/cb587f6672dbe585d101f590c3871d16e7aec5a576a1694997a3777312ac/parsedatetime-2.6.tar.gz", hash = "sha256:4cb368fbb18a0b7231f4d76119165451c8d2e35951455dfee97c62a87b04d455", size = 60114, upload-time = "2020-05-31T23:50:57.443Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9d/a4/3dd804926a42537bf69fb3ebb9fd72a50ba84f807d95df5ae016606c976c/parsedatetime-2.6-py3-none-any.whl", hash = "sha256:cb96edd7016872f58479e35879294258c71437195760746faffedb692aef000b", size = 42548, upload-time = "2020-05-31T23:50:56.315Z" },
+]
+
+[[package]]
+name = "pathlib"
+version = "1.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ac/aa/9b065a76b9af472437a0059f77e8f962fe350438b927cb80184c32f075eb/pathlib-1.0.1.tar.gz", hash = "sha256:6940718dfc3eff4258203ad5021090933e5c04707d5ca8cc9e73c94a7894ea9f", size = 49298, upload-time = "2014-09-03T15:41:57.18Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/78/f9/690a8600b93c332de3ab4a344a4ac34f00c8f104917061f779db6a918ed6/pathlib-1.0.1-py3-none-any.whl", hash = "sha256:f35f95ab8b0f59e6d354090350b44a80a80635d22efdedfa84c7ad1cf0a74147", size = 14363, upload-time = "2022-05-04T13:37:20.585Z" },
 ]
 
 [[package]]
