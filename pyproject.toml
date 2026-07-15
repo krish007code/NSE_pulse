@@ -9,6 +9,7 @@ dependencies = [
     "cryptography>=49.0.0",
     "dbt-clickhouse>=1.10.0",
     "minio>=7.2.20",
+    "pathlib>=1.0.1",
     "polars>=1.41.2",
     "pyarrow>=24.0.0",
     "tqdm>=4.68.2",

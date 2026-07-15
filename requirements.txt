@@ -4,3 +4,4 @@ minio
 clickhouse-connect
 python-dotenv
 tqdm
+pathlib

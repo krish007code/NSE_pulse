@@ -4,7 +4,7 @@ x-airflow-common: &airflow-common
   build:
     context: .
     dockerfile: dockerfile.airflow
-  env_file: .env 
+  env_file: .env
   environment:
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${USER1}:${PWD1}@postgres:5432/nse_pulse_DB
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
@@ -19,21 +19,38 @@ x-airflow-common: &airflow-common
 services:
 
   dbt:
-      build:
-        context: .
-        dockerfile: dockerfile.dbt
-      container_name: dbt
-      user: "1000:1000"
-      environment:
-        - HOME=/dbt 
-      volumes:
-        - ./dbt_project:/dbt
-      networks:
-        - nse_pulse_network
-      depends_on:
-        - clickhouse
-      command: sleep infinity
-      
+    build:
+      context: .
+      dockerfile: dockerfile.dbt
+    container_name: dbt
+    user: "1000:1000"
+    env_file: .env
+    environment:
+      - HOME=/dbt
+    volumes:
+      - ./dbt_project:/dbt
+    networks:
+      - nse_pulse_network
+    depends_on:
+      - clickhouse
+    command: sleep infinity
+
+  fastapi:
+    build:
+      context: .
+      dockerfile: dockerfile.fastapi
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+    networks:
+      - nse_pulse_network
+    depends_on:
+      - clickhouse
+
   postgres:
     image: postgres:16
     container_name: postgres
@@ -60,7 +77,9 @@ services:
     volumes:
       - clickhouse_data:/var/lib/clickhouse
     environment:
-      CLICKHOUSE_DB: analytics
+      CLICKHOUSE_DB: nse_pulse_db
+      CLICKHOUSE_USER: ${clickhouse_user}
+      CLICKHOUSE_PASSWORD: ${clikhouse_pwd}
     ulimits:
       nofile:
         soft: 262144
@@ -85,16 +104,7 @@ services:
     <<: *airflow-common
     container_name: airflow-init
     command: >
-      bash -c "
-      airflow db migrate &&
-      airflow users create 
-      --username ${USER1} 
-      --password ${PWD1} 
-      --firstname Krish 
-      --lastname Dev 
-      --role Admin 
-      --email kavyanshkumarbaghel@gmail.com
-      "
+      bash -c " airflow db migrate && airflow users create  --username ${USER1}  --password ${PWD1}  --firstname Krish  --lastname Dev  --role Admin  --email kavyanshkumarbaghel@gmail.com "
 
   webserver:
     <<: *airflow-common
@@ -125,7 +135,7 @@ services:
         condition: service_started
       airflow-init:
         condition: service_completed_successfully
-  
+
   metabase:
     image: metabase/metabase:latest
     container_name: metabase
