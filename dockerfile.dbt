@@ -1,4 +1,8 @@
 FROM python:3.13-slim
+
+RUN groupadd -g 1000 appgroup && \
+    useradd -u 1000 -g appgroup -s /bin/bash -m appuser
+
 WORKDIR /dbt
 
 # 1. Update the package manager and install git
@@ -10,3 +14,8 @@ RUN apt-get update && \
 # 2. Install dbt and the ClickHouse adapter
 # --no-cache-dir prevents pip from saving downloaded packages, saving space
 RUN pip install --no-cache-dir dbt-core dbt-clickhouse
+
+# Change ownership of the correct working directory
+RUN chown -R appuser:appgroup /dbt
+
+USER appuser

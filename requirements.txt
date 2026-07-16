@@ -5,3 +5,4 @@ clickhouse-connect
 python-dotenv
 tqdm
 pathlib
+loguru
