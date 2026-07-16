@@ -1,22 +1,70 @@
 name: nse_pulse
 
+x-networks: &app-networks
+  - nse_pulse_network
+
 x-airflow-common: &airflow-common
   build:
     context: .
     dockerfile: dockerfile.airflow
   env_file: .env
   environment:
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${USER1}:${PWD1}@postgres:5432/nse_pulse_DB
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${USER1}:${PWD1}@postgres:5432/${POSTGRES_DB}
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
     AIRFLOW__CORE__FERNET_KEY: ${FERNET_KEY}
   depends_on:
     postgres:
       condition: service_started
-  networks:
-    - nse_pulse_network
-
+  networks: *app-networks
 services:
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${USER1}
+      POSTGRES_PASSWORD: ${PWD1}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_EXTERNAL_PORT:-5433}:5432"
+    restart: unless-stopped
+    networks: *app-networks
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.1
+    container_name: clickhouse
+    networks: *app-networks
+    ports:
+      - "8123:8123" # web
+      - "9005:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    env_file: .env
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PWD}
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+  fastapi:
+    build:
+      context: .
+      dockerfile: dockerfile.fastapi
+    container_name: FastAPI
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      CLICKHOUSE_HOST: ${CLICKHOUSE_HOST:-clickhouse}
+      CLICKHOUSE_PORT: ${CLICKHOUSE_HTTP_PORT:-8123}
+    networks: *app-networks
+    depends_on:
+      - clickhouse
 
   dbt:
     build:
@@ -29,61 +77,10 @@ services:
       - HOME=/dbt
     volumes:
       - ./dbt_project:/dbt
-    networks:
-      - nse_pulse_network
+    networks: *app-networks
     depends_on:
       - clickhouse
-    command: sleep infinity
-
-  fastapi:
-    build:
-      context: .
-      dockerfile: dockerfile.fastapi
-    volumes:
-      - ./backend:/app
-    ports:
-      - "8000:8000"
-    environment:
-      CLICKHOUSE_HOST: clickhouse
-      CLICKHOUSE_PORT: 8123
-    networks:
-      - nse_pulse_network
-    depends_on:
-      - clickhouse
-
-  postgres:
-    image: postgres:16
-    container_name: postgres
-    environment:
-      POSTGRES_USER: ${USER1}
-      POSTGRES_PASSWORD: ${PWD1}
-      POSTGRES_DB: "nse_pulse_DB"
-    restart: unless-stopped
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - nse_pulse_network
-    ports:
-      - "5433:5432"
-
-  clickhouse:
-    image: clickhouse/clickhouse-server:24.1
-    container_name: clickhouse
-    networks:
-      - nse_pulse_network
-    ports:
-      - "8123:8123"
-      - "9005:9000"
-    volumes:
-      - clickhouse_data:/var/lib/clickhouse
-    environment:
-      CLICKHOUSE_DB: nse_pulse_db
-      CLICKHOUSE_USER: ${clickhouse_user}
-      CLICKHOUSE_PASSWORD: ${clikhouse_pwd}
-    ulimits:
-      nofile:
-        soft: 262144
-        hard: 262144
+    #command: sleep infinity
 
   minio:
     image: minio/minio:latest
@@ -94,8 +91,7 @@ services:
       MINIO_ROOT_PASSWORD: ${PWD1}
     volumes:
       - minio_data:/data
-    networks:
-      - nse_pulse_network
+    networks: *app-networks
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -104,7 +100,7 @@ services:
     <<: *airflow-common
     container_name: airflow-init
     command: >
-      bash -c " airflow db migrate && airflow users create  --username ${USER1}  --password ${PWD1}  --firstname Krish  --lastname Dev  --role Admin  --email kavyanshkumarbaghel@gmail.com "
+      bash -c " airflow db migrate && airflow users create --username ${USER1} --password ${PWD1} --firstname ${AIRFLOW_FIRSTNAME} --lastname ${AIRFLOW_LASTNAME} --role ${AIRFLOW_ROLE} --email ${AIRFLOW_EMAIL} "
 
   webserver:
     <<: *airflow-common
@@ -141,8 +137,7 @@ services:
     container_name: metabase
     ports:
       - "3000:3000"
-    networks:
-      - nse_pulse_network
+    networks: *app-networks
     depends_on:
       - clickhouse
     volumes:

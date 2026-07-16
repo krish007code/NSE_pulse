@@ -21,4 +21,5 @@ dev = [
     "apache-airflow>=3.2.2",
     "cryptography>=49.0.0",
     "fernet>=1.0.1",
+    "loguru>=0.7.3",
 ]

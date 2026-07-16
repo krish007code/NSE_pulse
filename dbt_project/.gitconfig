@@ -2,4 +2,4 @@
 	name = krish007code
 	email = kavyanshkumarbaghel@gmail.com
 [credential]
-	helper = "!f() { /dbt/.vscode-server/bin/fc3def6774c76082adf699d366f31a557ce5573f/node /tmp/vscode-remote-containers-57931832-966d-466c-b833-796d64dd3899.js git-credential-helper $*; }; f"
+	helper = "!f() { /dbt/.vscode-server/bin/fc3def6774c76082adf699d366f31a557ce5573f/node /tmp/vscode-remote-containers-10caf32c-7fdb-4b2d-8abe-5abae2a0d0c4.js git-credential-helper $*; }; f"
