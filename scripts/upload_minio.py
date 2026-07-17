@@ -1,89 +1,73 @@
-import os
-import sys
-import configparser
-from datetime import datetime, timezone
-from pathlib import Path
-
 from minio import Minio
+import os
 from dotenv import load_dotenv
+from datetime import datetime, timezone
+
+now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+from pathlib import Path
+import sys
 
 project_root = Path(__file__).resolve().parent.parent
 sys.path.append(str(project_root))
+config_path = project_root / "config.ini"
 
 from utility.custom_logger import logger
-
-now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-config_path = project_root / "config.ini"
+import configparser
 
 config = configparser.ConfigParser()
 config.read(config_path)
-logger.info(f"Loaded configuration from {config_path}")
+logger.info("ref config")
 
 load_dotenv()
-logger.info("Loaded environment variables from .env")
-
 MINIO_USER = os.environ.get("USER1")
 MINIO_PASS = os.environ.get("PWD1")
 bucket = config.get("minio", "bucket")
 
 
 def daily():
-    logger.info("Starting 'daily' upload to MinIO...")
+    logger.info("started daily")
 
-    path_str = config.get("data_paths", "daily_path")
-    file_path = Path(path_str)
-    object_name = file_path.name
-
-    logger.info("Connecting to MinIO")
+    path = config.get("data_paths", "daily_path")
+    object_name = Path(path).name
     client = Minio(
         "minio:9000", access_key=MINIO_USER, secret_key=MINIO_PASS, secure=False
     )
-
     if client.bucket_exists(bucket_name=bucket):
-        logger.info(f"Uploading {object_name} to bucket '{bucket}'...")
-        client.fput_object(
-            bucket_name=bucket, object_name=object_name, file_path=path_str
-        )
-        logger.info(f"Successfully uploaded {object_name} to MinIO.")
-
-        if file_path.exists():
-            file_path.unlink()
-            logger.info(f"Deleted local file: {file_path}")
+        client.fput_object(bucket_name=bucket, object_name=object_name, file_path=path)
+        logger.info(f"uploaded inside {bucket}")
+        path = Path(path)
+        if path.exists():
+            logger.info(f"freed data {bucket}")
+            path.unlink()
     else:
-        logger.error(f"Upload failed: Bucket '{bucket}' does not exist.")
+        logger.info("error bucket not exist")
 
 
 def one_time():
-    logger.info("Starting 'one_time' (historical) upload to MinIO...")
+    logger.info("started once")
+    path = config.get("data_paths", "historical_path")
+    object_name = Path(path).name
 
-    path_str = config.get("data_paths", "historical_path")
-    file_path = Path(path_str)
-    object_name = file_path.name
-
-    logger.info("Connecting to MinIO (host: localhost:9000)...")
     client = Minio(
         "localhost:9000", access_key=MINIO_USER, secret_key=MINIO_PASS, secure=False
     )
-
     if client.bucket_exists(bucket_name=bucket):
-        logger.info(f"Bucket '{bucket}' already exists.")
+        logger.info(f"bucket already exists {bucket}")
     else:
-        logger.info(f"Bucket '{bucket}' does not exist. Creating it now...")
+        logger.info("bucket does not exist")
         client.make_bucket(bucket_name=bucket)
-        logger.info(f"Successfully created bucket '{bucket}'.")
+    client.fput_object(bucket_name=bucket, object_name=object_name, file_path=path)
 
-    logger.info(f"Uploading {object_name} to bucket '{bucket}'...")
-    client.fput_object(bucket_name=bucket, object_name=object_name, file_path=path_str)
-    logger.info(f"Successfully uploaded {object_name} to MinIO.")
-
-    if file_path.exists():
-        file_path.unlink()
-        logger.info(f"Deleted local file: {file_path}")
+    path = Path(path)
+    if path.exists():
+        logger.info(f"freed {bucket}")
+        path.unlink()
 
 
 if __name__ == "__main__":
     try:
         one_time()
-        logger.info("MinIO upload script completed successfully.")
+        logger.info("minio upload script successfull.")
     except Exception as e:
-        logger.exception(f"MinIO upload script failed due to an error: {e}")
+        logger.exception(f"minio upload script failed due to error: {e}")

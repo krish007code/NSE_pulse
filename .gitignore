@@ -14,3 +14,5 @@ dbt_project/.vscode-server/
 .env
 scripts/.autocommit
 scripts/auto_commit_marts.sh
+
+backend/.vscode-server

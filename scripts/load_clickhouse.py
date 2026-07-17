@@ -1,26 +1,30 @@
-import os
-import sys
-import configparser
-from datetime import datetime, timezone
-from pathlib import Path
-
 import clickhouse_connect
-from dotenv import load_dotenv
+
+from datetime import datetime, timezone
+
+now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+
+from pathlib import Path
+import sys
 
 project_root = Path(__file__).resolve().parent.parent
 sys.path.append(str(project_root))
-
 from utility.custom_logger import logger
 
-now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 config_path = project_root / "config.ini"
+
+import configparser
 
 config = configparser.ConfigParser()
 config.read(config_path)
-logger.info(f"Loaded configuration from {config_path}")
+logger.info(f"load config from {config_path}")
+
+from dotenv import load_dotenv
 
 load_dotenv()
-logger.info("Loaded environment variables from .env")
+
+import os
 
 MINIO_USER = os.environ.get("USER1")
 MINIO_PWD = os.environ.get("PWD1")
@@ -33,12 +37,9 @@ bucket = config.get("minio", "bucket")
 
 
 def once():
-    logger.info("Starting 'once' (historical) data load into ClickHouse...")
-
+    logger.info("started once")
     path = config.get("data_paths", "historical_path")
     file_name = Path(path).name
-
-    logger.info("Connecting to ClickHouse...")
     client = clickhouse_connect.get_client(
         host="localhost",
         port=8123,
@@ -46,13 +47,10 @@ def once():
         password=CLICKHOUSE_PWD,
         autogenerate_session_id=False,
     )
-
-    logger.info(f"Ensuring database '{database}' exists...")
     client.command(f"CREATE DATABASE IF NOT EXISTS {database};")
 
-    logger.info(f"Ensuring table '{table}' exists in database '{database}'...")
     client.command(f"""
-        CREATE TABLE IF NOT EXISTS {database}.{table} (
+        CREATE TABLE IF NOT EXISTS {table} (
             Date Datetime64(3, 'UTC'),
             Open Float64,
             High Float64,
@@ -65,11 +63,8 @@ def once():
         ORDER BY (ticker, Date)
     """)
 
-    logger.info(
-        f"Pulling data from MinIO bucket '{bucket}', file '{file_name}' into ClickHouse..."
-    )
     client.command(f"""
-        INSERT INTO {database}.{table}
+        INSERT INTO {table}
         SELECT
             Date,
             Open,
@@ -86,16 +81,13 @@ def once():
             'Parquet'
         )                
     """)
-    logger.info("Historical data successfully loaded into ClickHouse.")
+    logger.info("ended once")
 
 
 def everyday():
-    logger.info("Starting 'everyday' (daily) data load into ClickHouse...")
-
+    logger.info("started daily")
     path = config.get("data_paths", "daily_path")
     file_name = Path(path).name
-
-    logger.info("Connecting to ClickHouse")
     client = clickhouse_connect.get_client(
         host="clickhouse",
         port=8123,
@@ -103,12 +95,8 @@ def everyday():
         password=CLICKHOUSE_PWD,
         autogenerate_session_id=False,
     )
-
-    logger.info(
-        f"Pulling daily data from MinIO bucket '{bucket}', file '{file_name}' into ClickHouse..."
-    )
     client.command(f"""
-        INSERT INTO {database}.{table}
+        INSERT INTO {table}
         SELECT
             Date,
             Open,
@@ -125,12 +113,12 @@ def everyday():
             'Parquet'
         )                
     """)
-    logger.info("Daily data successfully loaded into ClickHouse.")
+    logger.info("ended daily")
 
 
 if __name__ == "__main__":
     try:
         once()
-        logger.info("ClickHouse ingestion script completed successfully.")
+        logger.info("load_clickhuose successfull.")
     except Exception as e:
-        logger.exception(f"ClickHouse ingestion script failed due to an error: {e}")
+        logger.exception(f"load clickhouse failed due to an error: {e}")

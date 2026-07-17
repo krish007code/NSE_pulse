@@ -5,7 +5,7 @@ logger.remove()
 logger.add(
     sys.stderr,
     format="<green>{time}</green> | {level} | {message} | {extra}",
-    level="Trace",
+    level="TRACE",
 )
 
 # for making a seperate file

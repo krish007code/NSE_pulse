@@ -1,47 +1,63 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Depends
+from typing import Annotated
 import clickhouse_connect
+from clickhouse_connect.driver.client import Client
 import os
 from dotenv import load_dotenv
+from pydantic import BaseModel
+
+
+class TickerResponse(BaseModel):
+    trade_date: str
+    ticker_symbol: str
+    close_price: float
+    rolling_max_365d: float
+    drawdown_pct: float
+
 
 load_dotenv()
 HOST = os.environ.get("CLICKHOUSE_HOST")
-PORT = os.environ.get("CLICKHOUSE_HTTP_PORT")
+PORT = os.environ.get("CLICKHOUSE_HTTP_PORT", 8123)
 USER = os.environ.get("CLICKHOUSE_USER")
 PWD = os.environ.get("CLICKHOUSE_PWD")
 
-app = FastAPI()
-client = clickhouse_connect.get_client(
-    host=HOST, port=PORT, username=USER, password=PWD
-)
+app = FastAPI(title="NSE_pulse API")
 
 
-@app.get("/health")
+def get_client():
+    client = clickhouse_connect.get_client(
+        host=HOST, port=int(PORT), username=USER, password=PWD
+    )
+    try:
+        yield client  # give the connection to the endpoint
+    finally:
+        client.close()  # close it when request is done
+
+
+ClientDep = Annotated[Client, Depends(get_client)]
+
+
+@app.get("/health", tags=["Core FastAPI mechanics"])
 def health():
     return {"status": "NSE Pulse API running"}
 
 
-@app.get("/drawdown")
-def get_drawdown(ticker: str):
+@app.get("/tickers/compare", tags=["Core FastAPI mechanics"])
+def get_tickers_compare(symbols: str, client: ClientDep):
+    symbol_list = tuple(symbols.strip().upper().split(","))
     result = client.query(
-        f"SELECT * FROM default.mart_drawdown WHERE ticker_symbol = '{ticker}'"
+        f"SELECT * FROM default.mart_drawdown WHERE ticker_symbol in {symbol_list} ORDER BY trade_date desc LIMIT {len(symbol_list)}"
     )
     return result.named_results()
 
 
-@app.get("/ticker/{symbol}/price")
-def get_ticker_price(symbol: str):
+@app.get("/ticker/{ticker}/summary", tags=["Core FastAPI mechanics"])
+def get_summary(ticker: str, client: ClientDep):
     result = client.query(
-        f"SELECT * FROM default.stg_raw_nse__daily_prices WHERE ticker_symbol = '{symbol}' ORDER BY trade_date desc LIMIT 1"
+        "SELECT * FROM default.mart_drawdown WHERE ticker_symbol = {ticker:String} ORDER BY trade_date desc LIMIT 1",
+        parameters={"ticker": ticker},
     )
-    return result.named_results()
+    if not result.named_results():
+        raise HTTPException(status_code=404, detail=f"Ticker {ticker} not found")
 
-
-@app.get("/ticker/")
-def about_ticker(
-    ticker_symbol: str,
-    trade_date: str,
-):
-    result = client.query(
-        f"SELECT * FROM default.stg_raw_nse__daily_prices WHERE ticker_symbol = '{ticker_symbol}' and trade_date = {trade_date}"
-    )
     return result.named_results()
