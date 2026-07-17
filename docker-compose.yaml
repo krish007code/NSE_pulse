@@ -59,6 +59,7 @@ services:
       - ./backend:/app
     ports:
       - "8000:8000"
+    env_file: .env
     environment:
       CLICKHOUSE_HOST: ${CLICKHOUSE_HOST:-clickhouse}
       CLICKHOUSE_PORT: ${CLICKHOUSE_HTTP_PORT:-8123}
