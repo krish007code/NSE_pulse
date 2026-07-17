@@ -1,23 +1,28 @@
 from minio import Minio
-import os
 from dotenv import load_dotenv
 from datetime import datetime, timezone
-
-now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-
 from pathlib import Path
+
 import sys
+import os
+import io
+import socket  # Added for network testing
 
-project_root = Path(__file__).resolve().parent.parent
-sys.path.append(str(project_root))
-config_path = project_root / "config.ini"
-
-from utility.custom_logger import logger
+from ingest import one_time_load, daily_load
 import configparser
 
+
+project_root = Path(__file__).resolve().parent.parent
+
+sys.path.append(str(project_root))
+from utility.custom_logger import logger
+
+config_path = project_root / "config.ini"
 config = configparser.ConfigParser()
 config.read(config_path)
 logger.info("ref config")
+
+now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 load_dotenv()
 MINIO_USER = os.environ.get("USER1")
@@ -25,44 +30,57 @@ MINIO_PASS = os.environ.get("PWD1")
 bucket = config.get("minio", "bucket")
 
 
+def get_working_host(host):
+    try:
+        with socket.create_connection((host.split(":")[0], 9000), timeout=0.5):
+            return host
+    except Exception:
+        return "localhost:9000"
+
+
+def upload_dataframe_to_minio(df, object_name, host):
+    if df is None:
+        logger.warning(f"DataFrame is empty. Skipping upload for {object_name}.")
+        return
+
+    client = Minio(host, access_key=MINIO_USER, secret_key=MINIO_PASS, secure=False)
+    buffer = io.BytesIO()
+    df.write_parquet(buffer)
+    buffer.seek(0)
+
+    client.put_object(
+        bucket_name=bucket,
+        object_name=object_name,
+        data=buffer,
+        length=buffer.getbuffer().nbytes,
+        content_type="application/octet-stream",
+    )
+    logger.info(f"Successfully streamed {object_name} to bucket {bucket}")
+
+
+def ensure_bucket_exists(host):
+    client = Minio(host, access_key=MINIO_USER, secret_key=MINIO_PASS, secure=False)
+    if not client.bucket_exists(bucket_name=bucket):
+        logger.info(f"Bucket {bucket} does not exist. Creating it...")
+        client.make_bucket(bucket_name=bucket)
+    else:
+        logger.info(f"Bucket already exists: {bucket}")
+
+
 def daily():
     logger.info("started daily")
-
-    path = config.get("data_paths", "daily_path")
-    object_name = Path(path).name
-    client = Minio(
-        "minio:9000", access_key=MINIO_USER, secret_key=MINIO_PASS, secure=False
-    )
-    if client.bucket_exists(bucket_name=bucket):
-        client.fput_object(bucket_name=bucket, object_name=object_name, file_path=path)
-        logger.info(f"uploaded inside {bucket}")
-        path = Path(path)
-        if path.exists():
-            logger.info(f"freed data {bucket}")
-            path.unlink()
-    else:
-        logger.info("error bucket not exist")
+    object_name = config.get("data", "daily")
+    host = get_working_host("minio:9000")
+    ensure_bucket_exists(host)
+    upload_dataframe_to_minio(daily_load(), object_name=object_name, host=host)
 
 
 def one_time():
     logger.info("started once")
-    path = config.get("data_paths", "historical_path")
-    object_name = Path(path).name
-
-    client = Minio(
-        "localhost:9000", access_key=MINIO_USER, secret_key=MINIO_PASS, secure=False
-    )
-    if client.bucket_exists(bucket_name=bucket):
-        logger.info(f"bucket already exists {bucket}")
-    else:
-        logger.info("bucket does not exist")
-        client.make_bucket(bucket_name=bucket)
-    client.fput_object(bucket_name=bucket, object_name=object_name, file_path=path)
-
-    path = Path(path)
-    if path.exists():
-        logger.info(f"freed {bucket}")
-        path.unlink()
+    object_name = config.get("data", option="historical")
+    host = get_working_host("minio:9000")
+    ensure_bucket_exists(host)
+    upload_dataframe_to_minio(one_time_load(), object_name=object_name, host=host)
 
 
 if __name__ == "__main__":

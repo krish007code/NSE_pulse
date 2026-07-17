@@ -6,15 +6,14 @@ import polars as pl
 import yfinance as yf
 from tqdm import tqdm
 
-now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-
 project_root = Path(__file__).resolve().parent.parent
 sys.path.append(str(project_root))
+
 from utility.custom_logger import logger
 
-config_path = project_root / "config.ini"
-data_dir = project_root / "data"
+now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
+config_path = project_root / "config.ini"
 config = configparser.ConfigParser(allow_no_value=True)
 config.read(config_path)
 
@@ -41,10 +40,11 @@ holder = [line.strip() for line in ticker_symbols.split("\n") if line.strip()]
 logger.info(f"found {len(holder)} tickers")
 
 
-def one_time_load():
+def data_from_yfinance(time):
+    logger.info("started ingest function")
     temp = []
     for code in tqdm(holder, desc="doing....."):
-        dat = yf.Ticker(code).history(period="1y")
+        dat = yf.Ticker(code).history(period=time)
 
         if dat.empty:
             logger.info(f"empty {code}")
@@ -62,46 +62,25 @@ def one_time_load():
         )
         temp.append(df)
 
-    df = pl.concat(temp)
-    logger.info(f"hostorical data{df.shape}")
+    if temp:
+        df = pl.concat(temp)
+    else:
+        logger.warning("temp is empty")
 
-    output_path = data_dir / "portfolio_data_historical.parquet"
-    df.write_parquet(output_path)
-    logger.info("wrote once file")
+    logger.info(f"data got {df.shape}")
+    return df if temp else None
 
-    config.set("data_paths", "historical_path", str(output_path))
-    with open(config_path, "w", encoding="utf-8") as configfile:
-        config.write(configfile, space_around_delimiters=True)
+
+def one_time_load():
+    logger.info("started one_time_load")
+    time = "5y"
+    return data_from_yfinance(time)
 
 
 def daily_load():
-    tmp = []
-    for c in tqdm(holder, desc="doing....."):
-        data = yf.Ticker(c).history(period="1d")
-
-        if data.empty:
-            logger.info(f"empty {c}")
-            continue
-
-        data.index = data.index.tz_convert("UTC")
-        data = data.reset_index()  # for date
-
-        df = pl.from_pandas(data)
-        df = df.with_columns(
-            [pl.lit(c).alias("ticker"), pl.lit(get_asset_class(c)).alias("asset_class")]
-        )
-        tmp.append(df)
-
-    df = pl.concat(tmp)
-    logger.info(f"daily data{df.shape}")
-
-    output_path = data_dir / f"portfolio_data_{now}.parquet"
-    df.write_parquet(output_path)
-    logger.info("wrote everyday file")
-
-    config.set("data_paths", "daily_path", str(output_path))
-    with open(config_path, "w", encoding="utf-8") as configfile:
-        config.write(configfile, space_around_delimiters=True)
+    logger.info("started daily load")
+    time = "1d"
+    return data_from_yfinance(time)
 
 
 if __name__ == "__main__":
