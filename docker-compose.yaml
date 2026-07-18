@@ -9,47 +9,50 @@ x-airflow-common: &airflow-common
     dockerfile: dockerfile.airflow
   env_file: .env
   environment:
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${USER1}:${PWD1}@postgres:5432/${POSTGRES_DB}
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PWD}@postgres:5432/${POSTGRES_DB}
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
     AIRFLOW__CORE__FERNET_KEY: ${FERNET_KEY}
+    AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
   depends_on:
     postgres:
       condition: service_started
   networks: *app-networks
+
 services:
   postgres:
     image: postgres:16
     container_name: postgres
+    networks: *app-networks
     environment:
-      POSTGRES_USER: ${USER1}
-      POSTGRES_PASSWORD: ${PWD1}
+      POSTGRES_USER: ${AIRFLOW_USER}
+      POSTGRES_PASSWORD: ${AIRFLOW_PWD}
       POSTGRES_DB: ${POSTGRES_DB}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     ports:
       - "${POSTGRES_EXTERNAL_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
-    networks: *app-networks
 
   clickhouse:
     image: clickhouse/clickhouse-server:24.1
     container_name: clickhouse
     networks: *app-networks
-    ports:
-      - "8123:8123" # web
-      - "9005:9000"
-    volumes:
-      - clickhouse_data:/var/lib/clickhouse
     env_file: .env
     environment:
       CLICKHOUSE_DB: ${CLICKHOUSE_DB}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PWD}
+    ports:
+      - "${CLICKHOUSE_HTTP_PORT:-8123}:8123"
+      - "9005:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
     ulimits:
       nofile:
         soft: 262144
         hard: 262144
+
   fastapi:
     build:
       context: .
@@ -57,6 +60,7 @@ services:
     container_name: FastAPI
     volumes:
       - ./backend:/app
+      - ./utility:/app
     ports:
       - "8000:8000"
     env_file: .env
@@ -88,8 +92,8 @@ services:
     container_name: minio
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: ${USER1}
-      MINIO_ROOT_PASSWORD: ${PWD1}
+      MINIO_ROOT_USER: ${MINIO_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_PWD}
     volumes:
       - minio_data:/data
     networks: *app-networks
@@ -101,7 +105,7 @@ services:
     <<: *airflow-common
     container_name: airflow-init
     command: >
-      bash -c " airflow db migrate && airflow users create --username ${USER1} --password ${PWD1} --firstname ${AIRFLOW_FIRSTNAME} --lastname ${AIRFLOW_LASTNAME} --role ${AIRFLOW_ROLE} --email ${AIRFLOW_EMAIL} "
+      bash -c " airflow db migrate && airflow users create --username ${AIRFLOW_USER} --password ${AIRFLOW_PWD} --firstname ${AIRFLOW_FIRSTNAME} --lastname ${AIRFLOW_LASTNAME} --role ${AIRFLOW_ROLE} --email ${AIRFLOW_EMAIL} "
 
   webserver:
     <<: *airflow-common

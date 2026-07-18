@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+clickhouse-connect
+python-dotenv
+httpx
+pydantic
+slowapi
