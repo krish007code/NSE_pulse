@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 import os
 import io
-import socket  # Added for network testing
+import socket
 
 from ingest import one_time_load, daily_load
 import configparser
@@ -15,7 +15,10 @@ import configparser
 project_root = Path(__file__).resolve().parent.parent
 
 sys.path.append(str(project_root))
-from utility.custom_logger import logger
+from utility.custom_logger import setup_logger
+
+log_directory = project_root / "utility/logs"
+logger = setup_logger(log_dir=log_directory)
 
 config_path = project_root / "config.ini"
 config = configparser.ConfigParser()
@@ -25,8 +28,8 @@ logger.info("ref config")
 now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 load_dotenv()
-MINIO_USER = os.environ.get("USER1")
-MINIO_PASS = os.environ.get("PWD1")
+MINIO_USER = os.environ.get("MINIO_USER")
+MINIO_PASS = os.environ.get("MINIO_PWD")
 bucket = config.get("minio", "bucket")
 
 
@@ -69,7 +72,7 @@ def ensure_bucket_exists(host):
 
 def daily():
     logger.info("started daily")
-    object_name = config.get("data", "daily")
+    object_name = config.get("data", "daily") + ".parquet"
     host = get_working_host("minio:9000")
     ensure_bucket_exists(host)
     upload_dataframe_to_minio(daily_load(), object_name=object_name, host=host)
@@ -77,7 +80,7 @@ def daily():
 
 def one_time():
     logger.info("started once")
-    object_name = config.get("data", option="historical")
+    object_name = config.get("data", option="historical") + ".parquet"
     host = get_working_host("minio:9000")
     ensure_bucket_exists(host)
     upload_dataframe_to_minio(one_time_load(), object_name=object_name, host=host)

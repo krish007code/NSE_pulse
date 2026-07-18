@@ -8,14 +8,16 @@ from tqdm import tqdm
 
 project_root = Path(__file__).resolve().parent.parent
 sys.path.append(str(project_root))
+from utility.custom_logger import setup_logger
 
-from utility.custom_logger import logger
-
+log_directory = project_root / "utility/logs"
+logger = setup_logger(log_dir=log_directory)
 now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 config_path = project_root / "config.ini"
 config = configparser.ConfigParser(allow_no_value=True)
 config.read(config_path)
+logger.info("read config")
 
 
 def get_asset_class(ticker):
