@@ -1,33 +1,32 @@
+import configparser
 import clickhouse_connect
-
-from datetime import datetime, timezone
-
-now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-
-
-from pathlib import Path
 import sys
+import os
+
+from dotenv import load_dotenv
+from datetime import datetime, timezone
+from pathlib import Path
 
 project_root = Path(__file__).resolve().parent.parent
 sys.path.append(str(project_root))
-from utility.custom_logger import logger
 
-config_path = project_root / "config.ini"
+from utility.custom_logger import setup_logger
 
-import configparser
+log_directory = project_root / "utility/logs"
+logger = setup_logger(log_dir=log_directory)
+
 
 config = configparser.ConfigParser()
+config_path = project_root / "config.ini"
 config.read(config_path)
 logger.info(f"load config from {config_path}")
 
-from dotenv import load_dotenv
+now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 load_dotenv()
 
-import os
-
-MINIO_USER = os.environ.get("USER1")
-MINIO_PWD = os.environ.get("PWD1")
+MINIO_USER = os.environ.get("MINIO_USER")
+MINIO_PWD = os.environ.get("MINIO_PWD")
 CLICKHOUSE_USER = os.environ.get("CLICKHOUSE_USER")
 CLICKHOUSE_PWD = os.environ.get("CLICKHOUSE_PWD")
 
@@ -38,8 +37,7 @@ bucket = config.get("minio", "bucket")
 
 def once():
     logger.info("started once")
-    path = config.get("data_paths", "historical_path")
-    file_name = Path(path).name
+    file_name = config.get("data", "historical") + ".parquet"
     client = clickhouse_connect.get_client(
         host="localhost",
         port=8123,
@@ -86,8 +84,7 @@ def once():
 
 def everyday():
     logger.info("started daily")
-    path = config.get("data_paths", "daily_path")
-    file_name = Path(path).name
+    file_name = config.get("data", "daily") + ".parquet"
     client = clickhouse_connect.get_client(
         host="clickhouse",
         port=8123,
