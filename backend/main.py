@@ -1,5 +1,9 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks, Request
+from fastapi.responses import JSONResponse
 from typing import Annotated
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 import clickhouse_connect
 from clickhouse_connect.driver.client import Client
 import os
@@ -37,6 +41,15 @@ def get_client():
 ClientDep = Annotated[Client, Depends(get_client)]
 
 
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+
+
+@app.exception_handler(RateLimitExceeded)
+def rate_limit_handler(request: Request, exec: RateLimitExceeded):
+    return JSONResponse(status_code=429, content={"message": "rate limit exceeded"})
+
+
 @app.get("/health", tags=["Core FastAPI mechanics"])
 def health():
     return {"status": "NSE Pulse API running"}
@@ -52,7 +65,8 @@ def get_tickers_compare(symbols: str, client: ClientDep):
 
 
 @app.get("/ticker/{ticker}/summary", tags=["Core FastAPI mechanics"])
-def get_summary(ticker: str, client: ClientDep):
+@limiter.limit("30/minute")
+def get_summary(request: Request, ticker: str, client: ClientDep):
     result = client.query(
         "SELECT * FROM default.mart_drawdown WHERE ticker_symbol = {ticker:String} ORDER BY trade_date desc LIMIT 1",
         parameters={"ticker": ticker},
@@ -61,3 +75,20 @@ def get_summary(ticker: str, client: ClientDep):
         raise HTTPException(status_code=404, detail=f"Ticker {ticker} not found")
 
     return result.named_results()
+
+
+import httpx
+
+
+def trigger_airflow_dag():
+    httpx.post(
+        "http://webserver:8080/api/v1/dags/nse_pipeline/dagRuns",
+        json={"conf": {}},
+        auth=("krish", "krish123"),
+    )
+
+
+@app.post("/refresh", tags=["refresh"])
+def refresh_today(background_tasks: BackgroundTasks):
+    background_tasks.add_task(trigger_airflow_dag)
+    return {"message": "refresh request sent"}

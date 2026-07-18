@@ -5,7 +5,7 @@ RUN groupadd -g 1000 appgroup && \
     useradd -u 1000 -g appgroup -s /bin/bash -m appuser
 
 WORKDIR /app
-RUN pip install --no-cache-dir fastapi uvicorn clickhouse-connect python-dotenv
+RUN pip install --no-cache-dir -r requirements.fastapi.txt
 
 # non-root user ownership
 RUN chown -R appuser:appgroup /app
