@@ -1,23 +1,26 @@
-import configparser
-import sys
-from datetime import datetime, timezone
-from pathlib import Path
 import polars as pl
 import yfinance as yf
-from tqdm import tqdm
 
-project_root = Path(__file__).resolve().parent.parent
-sys.path.append(str(project_root))
+from tqdm import tqdm
+from datetime import datetime, timezone
+
+import configparser
+import sys
+from pathlib import Path
+
+project_root = Path(__file__).resolve().parent.parent  #
+sys.path.append(str(project_root))  #
 from utility.custom_logger import setup_logger
 
-log_directory = project_root / "utility/logs"
-logger = setup_logger(log_dir=log_directory)
-now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+log_directory = project_root / "utility/logs"  #
+logger = setup_logger(log_dir=log_directory)  #
+
+now = datetime.now(timezone.utc).strftime("%Y-%m-%d")  #
 
 config_path = project_root / "config.ini"
 config = configparser.ConfigParser(allow_no_value=True)
 config.read(config_path)
-logger.info("read config")
+logger.info("red config")
 
 
 def get_asset_class(ticker):
@@ -38,7 +41,7 @@ def get_asset_class(ticker):
 
 
 ticker_symbols = config.get("ticker_symbols", "holder")
-holder = [line.strip() for line in ticker_symbols.split("\n") if line.strip()]
+holder = [line.strip() for line in ticker_symbols.split("\n") if line.strip()]  #
 logger.info(f"found {len(holder)} tickers")
 
 
