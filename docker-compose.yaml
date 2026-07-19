@@ -60,7 +60,7 @@ services:
     container_name: FastAPI
     volumes:
       - ./backend:/app
-      - ./utility:/app
+      - ./utility:/app/utility
     ports:
       - "8000:8000"
     env_file: .env
