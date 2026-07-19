@@ -1,6 +1,7 @@
-import configparser
 import clickhouse_connect
+
 import sys
+import configparser
 import os
 
 from dotenv import load_dotenv
