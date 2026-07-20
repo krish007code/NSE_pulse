@@ -1,29 +1,19 @@
-with p as (
-    select * from {{ ref('stg_raw_nse__daily_prices') }}
+with max_date_cte as (
+    select max(trade_date) as max_date from {{ ref('stg_raw_nse__daily_prices') }}
 ),
 recent as (
     select *
-    from p
-    where trade_date >= dateadd(month, -6, current_date)
-),
-bounds as (
-    select
-        asset_class,
-        ticker_symbol,
-        min(trade_date) as start_date,
-        max(trade_date) as end_date
-    from recent
-    group by asset_class, ticker_symbol
+    from {{ ref('stg_raw_nse__daily_prices') }}
+    where trade_date >= (select max_date from max_date_cte) - interval 6 month
 ),
 prices as (
     select
-        b.asset_class,
-        b.ticker_symbol,
-        s.close_price as start_price,
-        e.close_price as end_price
-    from bounds b
-    join recent s on s.ticker_symbol = b.ticker_symbol and s.trade_date = b.start_date
-    join recent e on e.ticker_symbol = b.ticker_symbol and e.trade_date = b.end_date
+        asset_class,
+        ticker_symbol,
+        argMin(close_price, trade_date) as start_price,
+        argMax(close_price, trade_date) as end_price
+    from recent
+    group by asset_class, ticker_symbol
 )
 select
     asset_class,

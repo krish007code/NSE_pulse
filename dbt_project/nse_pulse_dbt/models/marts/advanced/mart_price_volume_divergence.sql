@@ -5,7 +5,10 @@ with v as (
         trade_date,
         daily_return,
         trade_volume,
-        lag(trade_volume) over (partition by ticker_symbol order by trade_date) as prev_volume
+        lagInFrame(trade_volume) over (
+            partition by ticker_symbol 
+            order by trade_date
+        ) as prev_volume
     from {{ ref('int_returns') }}
 )
 select
@@ -17,4 +20,4 @@ select
     prev_volume
 from v
 where daily_return > 0
-and trade_volume < prev_volume
+  and trade_volume < prev_volume

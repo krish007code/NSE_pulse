@@ -1,13 +1,16 @@
 FROM python:3.11-slim
 
-# create non root user and group with UID 1000
+WORKDIR /app
+
 RUN groupadd -g 1000 appgroup && \
     useradd -u 1000 -g appgroup -s /bin/bash -m appuser
 
-WORKDIR /app
+COPY requirements.fastapi.txt .
+
 RUN pip install --no-cache-dir -r requirements.fastapi.txt
 
-# non-root user ownership
+COPY requirements.fastapi.txt .
+
 RUN chown -R appuser:appgroup /app
 USER appuser
 

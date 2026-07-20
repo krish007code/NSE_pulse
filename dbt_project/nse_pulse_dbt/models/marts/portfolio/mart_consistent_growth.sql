@@ -12,7 +12,7 @@ select
     asset_class,
     sum(case when monthly_return > 0 then 1 else 0 end) as positive_months,
     count(*) as total_months,
-    stddev(monthly_return) as monthly_return_stddev
+    stddevPop(monthly_return) as monthly_return_stddev
 from m
 group by ticker_symbol, asset_class
 order by positive_months desc, monthly_return_stddev asc

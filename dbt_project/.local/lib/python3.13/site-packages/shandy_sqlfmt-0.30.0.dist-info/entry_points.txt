@@ -1,0 +1,3 @@
+[console_scripts]
+sqlfmt = sqlfmt.cli:sqlfmt
+sqlfmt_primer = sqlfmt_primer.primer:sqlfmt_primer
