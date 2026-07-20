@@ -3,7 +3,7 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from typing import Annotated
 from clickhouse_connect.driver.client import Client
-from ...dependencies import get_client, limiter
+from dependencies import get_client, limiter
 
 router = APIRouter(prefix="/ticker", tags=["ticker"])
 ClientDep = Annotated[Client, Depends(get_client)]

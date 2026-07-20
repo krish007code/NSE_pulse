@@ -6,7 +6,7 @@ nse_pulse_dbt:
       driver: http               # Usually 'http' or 'native'
       host: clickhouse           # Replace with your ClickHouse host IP/URL
       port: 8123                 
-      user: "{{ env_var('clickhouse_user') }}"
-      password: "{{ env_var('clikhouse_pwd') }}"
+      user: "{{ env_var('CLICKHOUSE_USER') }}"
+      password: "{{ env_var('CLICKHOUSE_PWD') }}"
       schema: default            
       

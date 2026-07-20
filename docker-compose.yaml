@@ -13,7 +13,7 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
     AIRFLOW__CORE__FERNET_KEY: ${FERNET_KEY}
-    AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth # api
+    AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
   depends_on:
     postgres:
       condition: service_started
@@ -85,7 +85,7 @@ services:
     networks: *app-networks
     depends_on:
       - clickhouse
-  # command: sleep infinity
+    command: sleep infinity
 
   minio:
     image: minio/minio:latest

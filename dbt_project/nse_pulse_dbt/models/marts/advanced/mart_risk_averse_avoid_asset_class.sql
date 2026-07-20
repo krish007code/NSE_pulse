@@ -1,12 +1,15 @@
-with r as (
+with max_date_cte as (
+    select max(trade_date) as max_date from {{ ref('int_returns') }}
+),
+r as (
     select *
     from {{ ref('int_returns') }}
-    where trade_date >= dateadd(day, -90, current_date)
+    where trade_date >= (select max_date from max_date_cte) - interval 90 day
 ),
 vol as (
     select
         asset_class,
-        stddev(daily_return) as volatility_90d
+        stddevPop(daily_return) as volatility_90d
     from r
     group by asset_class
 ),
@@ -15,7 +18,7 @@ dd as (
         asset_class,
         min(drawdown_pct) as max_drawdown_90d
     from {{ ref('int_drawdown') }}
-    where trade_date >= dateadd(day, -90, current_date)
+    where trade_date >= (select max_date from max_date_cte) - interval 90 day
     group by asset_class
 )
 select
