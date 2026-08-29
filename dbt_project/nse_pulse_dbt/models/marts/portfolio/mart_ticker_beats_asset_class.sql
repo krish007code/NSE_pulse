@@ -1,25 +1,24 @@
-with t as (
+with ytd as (
     select
         ticker_symbol,
         asset_class,
         avg(daily_return) as ticker_avg_return
     from {{ ref('int_returns') }}
-    where trade_date >= date_trunc('year', current_date)
+    where trade_date >= dateTrunc('year', (select max(trade_date) from {{ ref('int_returns') }}))
     group by ticker_symbol, asset_class
 ),
-c as (
+ranked as (
     select
+        ticker_symbol,
         asset_class,
-        avg(daily_return) as class_avg_return
-    from {{ ref('int_returns') }}
-    where trade_date >= date_trunc('year', current_date)
-    group by asset_class
+        ticker_avg_return,
+        avg(ticker_avg_return) over (partition by asset_class) as class_avg_return
+    from ytd
 )
 select
-    t.ticker_symbol,
-    t.asset_class,
-    t.ticker_avg_return,
-    c.class_avg_return
-from t
-join c on c.asset_class = t.asset_class
-where t.ticker_avg_return > c.class_avg_return
+    ticker_symbol,
+    asset_class,
+    ticker_avg_return,
+    class_avg_return
+from ranked
+where ticker_avg_return > class_avg_return

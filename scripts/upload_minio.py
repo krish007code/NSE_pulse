@@ -73,7 +73,7 @@ def upload_dataframe_to_minio(df, object_name, host):
 
 def daily():
     logger.info("started daily")
-    object_name = config.get("data", "daily") + ".parquet"
+    object_name = f'config.get("data", "daily")_{now}.parquet'
     host = get_working_host("localhost:9000")
     ensure_bucket_exists(host)
     upload_dataframe_to_minio(daily_load(), object_name=object_name, host=host)
@@ -87,14 +87,6 @@ def one_time():
     ensure_bucket_exists(host)
     upload_dataframe_to_minio(one_time_load(), object_name=object_name, host=host)
     logger.info("finish one_time")
-
-
-# --- NEW: bluesky uploads, same pattern as daily()/one_time() above ---
-# config.ini needs:
-# [data]
-# bluesky_daily = bluesky_posts_daily
-# bluesky_historical = bluesky_posts_historical
-
 
 def bluesky_daily():
     logger.info("started bluesky daily")

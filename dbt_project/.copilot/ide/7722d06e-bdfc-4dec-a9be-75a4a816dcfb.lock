@@ -1,0 +1,14 @@
+{
+  "socketPath": "/tmp/mcp-foKKhE/mcp.sock",
+  "scheme": "unix",
+  "headers": {
+    "Authorization": "Nonce 71931830-b862-4910-ae8c-5fd38cb92bfb"
+  },
+  "pid": 5219,
+  "ideName": "Visual Studio Code",
+  "timestamp": 1788019164028,
+  "workspaceFolders": [
+    "/dbt/nse_pulse_dbt"
+  ],
+  "isTrusted": true
+}

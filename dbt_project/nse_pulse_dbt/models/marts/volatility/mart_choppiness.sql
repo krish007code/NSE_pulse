@@ -1,26 +1,39 @@
 with d as (
-    select
-        ticker_symbol,
-        asset_class,
-        trade_date,
-        case when daily_return > 0 then 1 when daily_return < 0 then -1 else 0 end as direction
-    from {{ ref('int_returns') }}
+    select * from {{ ref('int_drawdown') }}
 ),
-flips as (
+
+trough as (
     select
         ticker_symbol,
         asset_class,
-        trade_date,
-        direction,
-        lag(direction) over (partition by ticker_symbol order by trade_date) as prev_direction
+        trade_date as trough_date,
+        close_price as trough_price,
+        running_peak as peak_price,
+        drawdown_pct
     from d
+    order by drawdown_pct asc
+    limit 1 by ticker_symbol
+),
+
+recovery as (
+    select
+        t.ticker_symbol,
+        min(d.trade_date) as recovery_date
+    from trough t
+    inner join d on d.ticker_symbol = t.ticker_symbol
+    -- Move non-equi conditions out of ON and into WHERE
+    where d.trade_date > t.trough_date
+      and d.close_price >= t.peak_price
+    group by t.ticker_symbol
 )
+
 select
-    ticker_symbol,
-    asset_class,
-    sum(case when direction != prev_direction then 1 else 0 end) as flip_count,
-    count(*) as total_days,
-    sum(case when direction != prev_direction then 1 else 0 end) / count(*) as choppiness_ratio
-from flips
-group by ticker_symbol, asset_class
-order by choppiness_ratio desc
+    t.ticker_symbol,
+    t.asset_class,
+    t.trough_date,
+    t.drawdown_pct,
+    r.recovery_date,
+    dateDiff('day', t.trough_date, r.recovery_date) as days_to_recover
+from trough t
+left join recovery r on r.ticker_symbol = t.ticker_symbol
+order by t.drawdown_pct asc

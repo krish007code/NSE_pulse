@@ -28,12 +28,6 @@ BLUESKY_APP_PASSWORD = os.environ.get("BLUESKY_APP_PASSWORD")
 
 now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
-# --- tickers, same pattern as ticker_symbols in ingest.py ---
-# config.ini needs:
-# [bluesky_tickers]
-# holder = RELIANCE
-#     TCS
-#     INFY
 bluesky_tickers = config.get("bluesky_tickers", "holder")
 holder = [line.strip() for line in bluesky_tickers.split("\n") if line.strip()]
 logger.info(f"found {len(holder)} bluesky tickers")
@@ -56,8 +50,6 @@ def looks_finance_relevant(text: str, symbol: str) -> bool:
 
 
 def keywords_for_symbol(symbol: str) -> list[str]:
-    # default derivation -- extend with a company-name map here if match
-    # quality needs it later (e.g. "RELIANCE" -> "Reliance Industries")
     return [f"${symbol}", f"{symbol} stock", f"{symbol} share", f"{symbol} results"]
 
 

@@ -6,3 +6,4 @@ select
     avg_close_7d,
     avg_close_30d
 from {{ ref('int_moving_avgs') }}
+order by ticker_symbol, trade_date

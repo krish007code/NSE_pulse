@@ -1,7 +1,11 @@
 version: 2
+
 sources:
   - name: raw_nse
-    database: nse_pulse_db # pls match databse name here that you gived in clickhouse config files or .env
+    database: nse_pulse_db # pls match database name here that you gived in clickhouse config files or .env
     tables:
       - name: ohlcv
         description: "Raw daily OHLCV data loaded from MinIO parquet files"
+
+      - name: bluesky_sentiment
+        description: "Raw per-post sentiment-scored Bluesky data loaded from MinIO parquet files"

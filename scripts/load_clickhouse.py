@@ -34,10 +34,7 @@ database = config.get("clickhouse", "database")
 table = config.get("clickhouse", "table")
 bucket = config.get("minio", "bucket")
 
-# NEW: config.ini needs, in [clickhouse]:
-# bluesky_table = bluesky_sentiment
 bluesky_table = config.get("clickhouse", "bluesky_table")
-
 
 def once():
     logger.info("started once")
@@ -115,10 +112,6 @@ def everyday():
         )                
     """)
     logger.info("ended daily")
-
-
-# --- NEW: bluesky sentiment load, mirrors once()/everyday() above ---
-
 
 def bluesky_once():
     logger.info("started bluesky once")

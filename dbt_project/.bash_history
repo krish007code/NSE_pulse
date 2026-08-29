@@ -99,3 +99,7 @@ clear
 dbt run
 clear
 dbt run
+pwd
+ls -a
+cd nse_pulse_dbt/
+code .
