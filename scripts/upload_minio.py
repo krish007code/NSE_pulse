@@ -9,6 +9,7 @@ import io
 import socket
 
 from ingest import one_time_load, daily_load
+from bluesky_ingest import historical_load as bluesky_historical_load, daily_load as bluesky_daily_load
 import configparser
 
 
@@ -57,9 +58,9 @@ def upload_dataframe_to_minio(df, object_name, host):
         return
 
     client = Minio(host, access_key=MINIO_USER, secret_key=MINIO_PASS, secure=False)
-    buffer = io.BytesIO()  #
-    df.write_parquet(buffer)  #
-    buffer.seek(0)  #
+    buffer = io.BytesIO()
+    df.write_parquet(buffer)
+    buffer.seek(0)
 
     client.put_object(
         bucket_name=bucket,
@@ -88,9 +89,43 @@ def one_time():
     logger.info("finish one_time")
 
 
+# --- NEW: bluesky uploads, same pattern as daily()/one_time() above ---
+# config.ini needs:
+# [data]
+# bluesky_daily = bluesky_posts_daily
+# bluesky_historical = bluesky_posts_historical
+
+
+def bluesky_daily():
+    logger.info("started bluesky daily")
+    object_name = f"bluesky/{config.get('data', 'bluesky_daily')}_{now}.parquet"
+    host = get_working_host("localhost:9000")
+    ensure_bucket_exists(host)
+    upload_dataframe_to_minio(bluesky_daily_load(), object_name=object_name, host=host)
+    logger.info("finish bluesky daily")
+
+
+def bluesky_one_time():
+    logger.info("started bluesky one_time")
+    object_name = f"bluesky/{config.get('data', 'bluesky_historical')}_{now}.parquet"
+    host = get_working_host("minio:9000")
+    ensure_bucket_exists(host)
+    upload_dataframe_to_minio(bluesky_historical_load(), object_name=object_name, host=host)
+    logger.info("finish bluesky one_time")
+
+
 if __name__ == "__main__":
     try:
         one_time()
         logger.info("minio upload script successfull")
     except Exception as e:
         logger.exception(f"minio upload script failed due to error: {e}")
+
+    # NEW: run bluesky historical pull in the same script execution.
+    # Kept as a separate try/except so a bluesky failure (e.g. API/auth
+    # issue) doesn't hide whether the yfinance upload above succeeded.
+    try:
+        bluesky_one_time()
+        logger.info("bluesky upload script successfull")
+    except Exception as e:
+        logger.exception(f"bluesky upload script failed due to error: {e}")
