@@ -1,0 +1,161 @@
+version: 2
+
+models:
+  - name: mart_market_breadth
+    description: >
+      Daily market breadth: what fraction of tickers advanced vs declined.
+      One row per trading day.
+    columns:
+      - name: trade_date
+        tests:
+          - not_null
+          - unique
+      - name: up_count
+        tests:
+          - not_null
+      - name: down_count
+        tests:
+          - not_null
+      - name: tickers_count
+        tests:
+          - not_null
+      - name: pct_up
+        tests:
+          - not_null
+      - name: pct_down
+        tests:
+          - not_null
+
+  - name: mart_consistent_growth
+    description: >
+      Per-ticker count of positive months and total months, with monthly return stddev.
+      One row per ticker.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+          - unique
+      - name: asset_class
+        tests:
+          - not_null
+      - name: positive_months
+        tests:
+          - not_null
+      - name: total_months
+        tests:
+          - not_null
+
+  - name: mart_correlated_pairs
+    description: Top 10 most positively correlated ticker pairs.
+    columns:
+      - name: ticker_a
+        tests:
+          - not_null
+      - name: ticker_b
+        tests:
+          - not_null
+      - name: correlation
+        tests:
+          - not_null
+
+  - name: mart_inverse_pairs
+    description: Top 10 most negatively correlated ticker pairs.
+    columns:
+      - name: ticker_a
+        tests:
+          - not_null
+      - name: ticker_b
+        tests:
+          - not_null
+      - name: correlation
+        tests:
+          - not_null
+
+  - name: mart_asset_class_perf_6m
+    description: Average 6-month return per asset class. One row per asset class.
+    columns:
+      - name: asset_class
+        tests:
+          - not_null
+          - unique
+      - name: avg_return_6m
+        tests:
+          - not_null
+
+  - name: mart_asset_class_index
+    description: >
+      Cumulative compounded return index per asset class per trading day.
+      Grain is (asset_class, trade_date). index_value starts near 1.0.
+    columns:
+      - name: asset_class
+        tests:
+          - not_null
+      - name: trade_date
+        tests:
+          - not_null
+      - name: index_value
+        tests:
+          - not_null
+    tests:
+      - unique:
+          column_name: "concat(asset_class, '|', toString(trade_date))"
+
+  - name: mart_ticker_beats_asset_class
+    description: >
+      Tickers whose YTD avg daily return exceeds their asset class average.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+          - unique
+      - name: asset_class
+        tests:
+          - not_null
+      - name: ticker_avg_return
+        tests:
+          - not_null
+      - name: class_avg_return
+        tests:
+          - not_null
+
+  - name: mart_risk_adjusted_return_quarter
+    description: >
+      Risk-adjusted (Sharpe-like) return per asset class over the last 90 days.
+      One row per asset class.
+    columns:
+      - name: asset_class
+        tests:
+          - not_null
+          - unique
+      - name: avg_return
+        tests:
+          - not_null
+      - name: return_risk
+        tests:
+          - not_null
+
+  - name: mart_equal_weight_portfolio
+    description: >
+      Single-row aggregate: total portfolio value if $1 was split equally
+      across all tickers at their first available date.
+    columns:
+      - name: portfolio_value_per_unit_invested
+        tests:
+          - not_null
+
+  - name: mart_crypto_selloff_reaction
+    description: >
+      Days where crypto avg return < -5%, showing other asset class reactions.
+    columns:
+      - name: trade_date
+        tests:
+          - not_null
+      - name: crypto_return
+        tests:
+          - not_null
+      - name: asset_class
+        tests:
+          - not_null
+      - name: avg_return
+        tests:
+          - not_null

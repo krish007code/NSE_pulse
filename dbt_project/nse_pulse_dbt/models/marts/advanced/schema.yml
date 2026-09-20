@@ -1,0 +1,89 @@
+version: 2
+
+models:
+  - name: mart_low_vol_steady_growth_picks
+    description: >
+      Top 5 tickers with positive average return, ordered by lowest volatility
+      then highest avg return. These are the "steady compounders".
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+          - unique
+      - name: asset_class
+        tests:
+          - not_null
+      - name: avg_return
+        tests:
+          - not_null
+      - name: volatility
+        tests:
+          - not_null
+
+  - name: mart_price_volume_divergence
+    description: >
+      Days where price rose (daily_return > 0) but volume was below the prior day.
+      Grain is (ticker_symbol, trade_date).
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: trade_date
+        tests:
+          - not_null
+      - name: daily_return
+        tests:
+          - not_null
+      - name: trade_volume
+        tests:
+          - not_null
+      - name: prev_volume
+        tests:
+          - not_null
+
+  - name: mart_lead_lag
+    description: >
+      Pairwise lead-lag correlation: does ticker A's return today predict ticker B's
+      return tomorrow? All ticker pairs included.
+    columns:
+      - name: leader
+        tests:
+          - not_null
+      - name: follower
+        tests:
+          - not_null
+      - name: lead_lag_correlation
+        tests:
+          - not_null
+
+  - name: mart_worst_day_recovery
+    description: >
+      Per-ticker: the date of worst single-day return and how long until
+      price recovered to the prior close. One row per ticker.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+          - unique
+      - name: worst_date
+        tests:
+          - not_null
+      - name: worst_return
+        tests:
+          - not_null
+
+  - name: mart_risk_averse_avoid_asset_class
+    description: >
+      Asset classes ranked by 90-day volatility and max drawdown.
+      One row per asset class.
+    columns:
+      - name: asset_class
+        tests:
+          - not_null
+          - unique
+      - name: volatility_90d
+        tests:
+          - not_null
+      - name: max_drawdown_90d
+        tests:
+          - not_null

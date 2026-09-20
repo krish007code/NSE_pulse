@@ -1,0 +1,153 @@
+version: 2
+
+models:
+  - name: mart_moving_averages
+    description: >
+      Daily 7-day and 30-day moving averages per ticker. One row per
+      ticker per trading day. Used directly by consumers needing smoothed price series.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: trade_date
+        tests:
+          - not_null
+      - name: close_price
+        tests:
+          - not_null
+      - name: avg_close_7d
+        tests:
+          - not_null
+      - name: avg_close_30d
+        tests:
+          - not_null
+    tests:
+      - unique:
+          column_name: "concat(ticker_symbol, '|', toString(trade_date))"
+
+  - name: mart_golden_cross
+    description: >
+      Rows where the 7-day MA crossed above the 30-day MA (bullish signal).
+      One row per (ticker, date) where the crossover occurred.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: trade_date
+        tests:
+          - not_null
+    tests:
+      - unique:
+          column_name: "concat(ticker_symbol, '|', toString(trade_date))"
+
+  - name: mart_death_cross
+    description: >
+      Rows where the 7-day MA crossed below the 30-day MA (bearish signal).
+      One row per (ticker, date) where the crossover occurred.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: trade_date
+        tests:
+          - not_null
+    tests:
+      - unique:
+          column_name: "concat(ticker_symbol, '|', toString(trade_date))"
+
+  - name: mart_52wk_high
+    description: >
+      Tickers that hit a 52-week high within the last 30 days.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: trade_date
+        tests:
+          - not_null
+      - name: close_price
+        tests:
+          - not_null
+
+  - name: mart_52wk_low
+    description: >
+      Intended to show tickers that hit a 52-week low within the last 30 days.
+      NOTE — this model has a known bug: the window uses MAX() instead of MIN(),
+      so it currently produces 52-week HIGH hits, not lows. Tests reflect the
+      actual (buggy) behaviour to make the bug visible, not to endorse it.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: trade_date
+        tests:
+          - not_null
+      - name: close_price
+        tests:
+          - not_null
+
+  - name: mart_above_30d_avg
+    description: >
+      Most recent date per ticker where close > 30-day moving average.
+      One row per ticker (LIMIT 1 BY ticker_symbol on latest date).
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+          - unique
+      - name: trade_date
+        tests:
+          - not_null
+      - name: close_price
+        tests:
+          - not_null
+      - name: avg_close_30d
+        tests:
+          - not_null
+
+  - name: mart_gap_up
+    description: Gap-up events where open was > 2% above prior close.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: trade_date
+        tests:
+          - not_null
+      - name: gap_pct
+        tests:
+          - not_null
+
+  - name: mart_gap_down
+    description: Gap-down events where open was > 2% below prior close.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: trade_date
+        tests:
+          - not_null
+      - name: gap_pct
+        tests:
+          - not_null
+
+  - name: mart_volume_unusual
+    description: >
+      Latest volume ratio (10-day avg / 60-day avg) per ticker.
+      One row per ticker.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+          - unique
+
+  - name: mart_market_wide_volume_spike
+    description: Top 10 trading days by total market volume.
+    columns:
+      - name: trade_date
+        tests:
+          - not_null
+          - unique
+      - name: total_volume
+        tests:
+          - not_null

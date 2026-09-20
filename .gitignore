@@ -8,9 +8,53 @@ wheels/
 
 # Virtual environments
 .venv
-dbt_project/.vscode-server/
+venv/
+env/
 
-.env
+# Editor / IDE settings
+.vscode/
+**/.vscode/
+.idea/
+*.swp
+*.swo
+
+# VS Code server remote extensions
+dbt_project/.vscode-server/
 backend/.vscode-server
 
+# OS files
+.DS_Store
+
+# Secrets / local config
+.env
+
+# Utility logs
 utility/logs
+
+# dbt local user state (per-user telemetry/identity, not project config)
+**/.user.yml
+dbt_project/.dbt/.user.yml
+
+# dbt runtime logs
+dbt_project/logs/
+
+# Installed Python packages (local user installs inside dbt_project container home)
+dbt_project/.local/
+
+# pip / tool cache
+dbt_project/.cache/
+
+# GitHub Copilot IDE local state & logs
+dbt_project/.copilot/
+
+# dotnet runtime crypto cache (CRL files)
+dbt_project/.dotnet/
+
+# Shell history
+dbt_project/.bash_history
+
+# SSH known hosts (local machine fingerprints)
+dbt_project/.ssh/
+
+# User-level git config
+dbt_project/.gitconfig

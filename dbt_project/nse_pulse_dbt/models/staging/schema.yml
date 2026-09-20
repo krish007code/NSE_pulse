@@ -1,0 +1,83 @@
+version: 2
+
+models:
+  - name: stg_raw_nse__daily_prices
+    description: >
+      Renamed and typed staging layer over the raw OHLCV source table.
+      One row per ticker per trading day. This is the root node of the
+      entire DAG — quality failures here propagate everywhere.
+    columns:
+      - name: ticker_symbol
+        description: NSE ticker identifier
+        tests:
+          - not_null
+      - name: asset_class
+        description: Asset class the ticker belongs to (e.g. equity, crypto, commodity)
+        tests:
+          - not_null
+      - name: trade_date
+        description: The calendar date of the trading session
+        tests:
+          - not_null
+      - name: open_price
+        description: Opening price for the session
+        tests:
+          - not_null
+      - name: high_price
+        description: Intraday high price
+        tests:
+          - not_null
+      - name: low_price
+        description: Intraday low price
+        tests:
+          - not_null
+      - name: close_price
+        description: Closing price for the session
+        tests:
+          - not_null
+      - name: trade_volume
+        description: Number of shares/units traded
+        tests:
+          - not_null
+    tests:
+      # The grain of this model is (ticker_symbol, trade_date).
+      # A duplicate here would corrupt every downstream window function.
+      - unique:
+          column_name: "concat(ticker_symbol, '|', toString(trade_date))"
+
+  - name: stg_bluesky_sentiment
+    description: >
+      Filtered and renamed staging layer over raw Bluesky post sentiment data.
+      Only finance-relevant posts are included (is_finance_relevant = true filter
+      is applied in the model). One row per post URI.
+    columns:
+      - name: post_uri
+        description: Unique identifier for a Bluesky post
+        tests:
+          - not_null
+          - unique
+      - name: ticker_symbol
+        description: Ticker the post was tagged to
+        tests:
+          - not_null
+      - name: posted_at
+        description: Timestamp when the post was created
+        tests:
+          - not_null
+      - name: sentiment_compound
+        description: >
+          Compound sentiment score. Standard VADER/BERT compound scores
+          are bounded in [-1, 1]. Rows outside this range indicate a
+          pipeline or model change and should fail loudly.
+        tests:
+          - not_null
+      - name: sentiment_label
+        description: Categorical sentiment label derived from compound score
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['positive', 'negative', 'neutral']
+      - name: engagement_score
+        description: Engagement metric (likes, reposts, etc.) — must be non-negative
+        tests:
+          - not_null

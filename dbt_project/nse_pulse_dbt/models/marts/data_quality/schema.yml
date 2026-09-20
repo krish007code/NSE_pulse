@@ -1,0 +1,87 @@
+version: 2
+
+models:
+  - name: mart_ticker_date_summary
+    description: >
+      One row per ticker summarising the full date range and number of days tracked.
+      Used as an audit view into data completeness per ticker.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+          - unique
+      - name: asset_class
+        tests:
+          - not_null
+      - name: first_date
+        tests:
+          - not_null
+      - name: last_date
+        tests:
+          - not_null
+      - name: days_tracked
+        tests:
+          - not_null
+
+  - name: mart_latest_close
+    description: >
+      One row per ticker with its most recent closing price and date.
+      Source of truth for last-known price used by downstream consumers.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+          - unique
+      - name: asset_class
+        tests:
+          - not_null
+      - name: last_close
+        tests:
+          - not_null
+      - name: last_date
+        tests:
+          - not_null
+
+  - name: mart_tickers_per_asset_class
+    description: >
+      One row per asset class with a count of distinct tickers.
+      Used to verify the universe of tracked instruments hasn't shrunk unexpectedly.
+    columns:
+      - name: asset_class
+        tests:
+          - not_null
+          - unique
+      - name: tickers_in_class
+        tests:
+          - not_null
+
+  - name: mart_missing_days
+    description: >
+      Rows represent (ticker, date) combinations that are present in the date
+      universe for the last 30 days but absent from the actual price data.
+      Zero rows is a healthy state; any rows are gaps to investigate.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: missing_date
+        tests:
+          - not_null
+
+  - name: mart_zero_volume_days
+    description: >
+      Rows are trading days where a ticker's volume was zero on a day when
+      other tickers did have volume — i.e. a genuine suspect trading halt.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: asset_class
+        tests:
+          - not_null
+      - name: trade_date
+        tests:
+          - not_null
+      - name: trade_volume
+        tests:
+          - not_null

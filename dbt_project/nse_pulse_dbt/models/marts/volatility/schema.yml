@@ -1,0 +1,161 @@
+version: 2
+
+models:
+  - name: mart_max_drawdown
+    description: >
+      Maximum (worst) drawdown percentage per ticker over the full history.
+      One row per ticker. max_drawdown is <= 0 by definition.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+          - unique
+      - name: asset_class
+        tests:
+          - not_null
+      - name: max_drawdown
+        tests:
+          - not_null
+
+  - name: mart_rolling_volatility_30d
+    description: >
+      30-day rolling return volatility per ticker per trading day.
+      Grain is (ticker_symbol, trade_date).
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: trade_date
+        tests:
+          - not_null
+    tests:
+      - unique:
+          column_name: "concat(ticker_symbol, '|', toString(trade_date))"
+
+  - name: mart_return_to_risk_ratio
+    description: >
+      Sharpe-like ratio (avg daily return / stddev) per ticker over full history.
+      One row per ticker.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+          - unique
+      - name: asset_class
+        tests:
+          - not_null
+      - name: avg_return
+        tests:
+          - not_null
+      - name: return_risk
+        tests:
+          - not_null
+
+  - name: mart_risk_by_asset_class
+    description: Average volatility per asset class. One row per asset class.
+    columns:
+      - name: asset_class
+        tests:
+          - not_null
+          - unique
+      - name: avg_volatility
+        tests:
+          - not_null
+
+  - name: mart_most_volatile
+    description: Top 10 most volatile tickers by return standard deviation.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+          - unique
+      - name: return_volatility
+        tests:
+          - not_null
+
+  - name: mart_near_all_time_high_low
+    description: >
+      Pct distance from all-time high and all-time low per ticker.
+      One row per ticker.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: last_close
+        tests:
+          - not_null
+      - name: all_time_high
+        tests:
+          - not_null
+      - name: all_time_low
+        tests:
+          - not_null
+      - name: pct_from_high
+        tests:
+          - not_null
+      - name: pct_from_low
+        tests:
+          - not_null
+
+  - name: mart_largest_intraday_swing
+    description: Single row — the globally largest intraday range_pct event.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: trade_date
+        tests:
+          - not_null
+      - name: range_pct
+        tests:
+          - not_null
+
+  - name: mart_drawdown_recovery
+    description: >
+      Per-ticker trough drawdown and recovery date.
+      One row per ticker. days_to_recover may be null if recovery hasn't happened.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+          - unique
+      - name: trough_date
+        tests:
+          - not_null
+      - name: drawdown_pct
+        tests:
+          - not_null
+
+  - name: mart_choppiness
+    description: >
+      Per-ticker trough and recovery (same logic as mart_drawdown_recovery but
+      uses a simpler recovery query). One row per ticker.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+          - unique
+      - name: trough_date
+        tests:
+          - not_null
+      - name: drawdown_pct
+        tests:
+          - not_null
+
+  - name: mart_volatility_spike
+    description: >
+      Days where range_pct exceeded 2x the 30-day average range.
+      Grain is (ticker_symbol, trade_date).
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: trade_date
+        tests:
+          - not_null
+      - name: range_pct
+        tests:
+          - not_null
+      - name: avg_range_pct_30d
+        tests:
+          - not_null

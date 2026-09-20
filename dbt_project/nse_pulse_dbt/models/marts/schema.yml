@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: mart_daily_sentiment
+    description: >
+      Daily aggregated sentiment per ticker: average compound score, positive/negative
+      post counts, total post volume, and total engagement.
+      Grain is (ticker_symbol, sentiment_date).
+
+      ⚠️  KNOWN BUG: The model's GROUP BY references `ticker` instead of `ticker_symbol`.
+      In ClickHouse this will raise a "Missing columns: ticker" error at runtime.
+      The test below will fail with a compilation/runtime error until the bug is fixed.
+      Do NOT add a `unique` test on the grain until the model itself is fixed.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: sentiment_date
+        tests:
+          - not_null
+      - name: avg_sentiment
+        tests:
+          - not_null
+      - name: post_volume
+        tests:
+          - not_null

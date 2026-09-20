@@ -1,0 +1,172 @@
+version: 2
+
+models:
+  - name: mart_cumulative_return
+    description: >
+      All-time cumulative return per ticker, computed as
+      (last_close - first_close) / first_close. One row per ticker.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+          - unique
+      - name: asset_class
+        tests:
+          - not_null
+      - name: first_close
+        tests:
+          - not_null
+      - name: last_close
+        tests:
+          - not_null
+      - name: cumulative_return
+        tests:
+          - not_null
+
+  - name: mart_ytd_return
+    description: >
+      Year-to-date return per ticker from the first trading day of the
+      current year to the most recent date. One row per ticker.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+          - unique
+      - name: start_price
+        tests:
+          - not_null
+      - name: end_price
+        tests:
+          - not_null
+      - name: ytd_return
+        tests:
+          - not_null
+      - name: ytd_rank
+        tests:
+          - not_null
+
+  - name: mart_avg_return_by_asset_class
+    description: >
+      Average daily return and standard deviation per asset class.
+      One row per asset class.
+    columns:
+      - name: asset_class
+        tests:
+          - not_null
+          - unique
+      - name: avg_daily_return
+        tests:
+          - not_null
+      - name: return_stddev
+        tests:
+          - not_null
+
+  - name: mart_monthly_return_by_asset_class
+    description: >
+      Average daily return per asset class per calendar month.
+      Grain is (asset_class, trade_month).
+    columns:
+      - name: asset_class
+        tests:
+          - not_null
+      - name: trade_month
+        tests:
+          - not_null
+      - name: avg_return
+        tests:
+          - not_null
+    tests:
+      - unique:
+          column_name: "concat(asset_class, '|', toString(trade_month))"
+
+  - name: mart_best_day
+    description: Single row — the globally best single-day return across all tickers.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: trade_date
+        tests:
+          - not_null
+      - name: daily_return
+        tests:
+          - not_null
+
+  - name: mart_worst_day
+    description: Single row — the globally worst single-day return across all tickers.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: trade_date
+        tests:
+          - not_null
+      - name: daily_return
+        tests:
+          - not_null
+
+  - name: mart_top_gainers_30d
+    description: Top 10 tickers by 30-day return.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+          - unique
+      - name: start_price
+        tests:
+          - not_null
+      - name: end_price
+        tests:
+          - not_null
+      - name: return_30d
+        tests:
+          - not_null
+
+  - name: mart_top_losers_7d
+    description: Bottom 10 tickers by 7-day return.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+          - unique
+      - name: start_price
+        tests:
+          - not_null
+      - name: end_price
+        tests:
+          - not_null
+      - name: return_7d
+        tests:
+          - not_null
+
+  - name: mart_up_streaks
+    description: Up-streaks of 5+ consecutive positive-return days per ticker.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: streak_start
+        tests:
+          - not_null
+      - name: streak_end
+        tests:
+          - not_null
+      - name: streak_length
+        tests:
+          - not_null
+
+  - name: mart_down_streaks
+    description: Down-streaks of 5+ consecutive negative-return days per ticker.
+    columns:
+      - name: ticker_symbol
+        tests:
+          - not_null
+      - name: streak_start
+        tests:
+          - not_null
+      - name: streak_end
+        tests:
+          - not_null
+      - name: streak_length
+        tests:
+          - not_null
