@@ -1,5 +1,9 @@
 with source as (
-    select * from {{ source('raw_nse', 'bluesky_sentiment') }}
+    -- FINAL forces ClickHouse's ReplacingMergeTree to deduplicate on read.
+    -- The bluesky_sentiment table is keyed on (ticker, created_at); since all
+    -- duplicate URIs share identical (ticker, created_at) values, FINAL eliminates
+    -- them without needing a separate dedup step.
+    select * from {{ source('raw_nse', 'bluesky_sentiment') }} FINAL
 ),
 
 renamed as (

@@ -8,5 +8,5 @@ select
     count(*) as post_volume,
     sum(engagement_score) as total_engagement
 from {{ref('stg_bluesky_sentiment')}}
-group by ticker, sentiment_date
-order by ticker, sentiment_date
+group by ticker_symbol, sentiment_date
+order by ticker_symbol, sentiment_date

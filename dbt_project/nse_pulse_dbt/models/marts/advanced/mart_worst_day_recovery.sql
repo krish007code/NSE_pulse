@@ -11,7 +11,10 @@ with worst as (
 recovery as (
     select
         w.ticker_symbol,
-        minIf(p.trade_date, p.trade_date > w.worst_date and p.close_price >= w.price_before_drop) as recovery_date
+        nullIf(
+            minIf(p.trade_date, p.trade_date > w.worst_date and p.close_price >= w.price_before_drop),
+            toDate('1970-01-01')
+        ) as recovery_date
     from worst w
     join {{ ref('stg_raw_nse__daily_prices') }} p
         on p.ticker_symbol = w.ticker_symbol

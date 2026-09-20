@@ -19,7 +19,10 @@ trough as (
 recovery as (
     select
         t.ticker_symbol,
-        minIf(d.trade_date, d.trade_date > t.trough_date and d.close_price >= t.peak_price) as recovery_date
+        nullIf(
+            minIf(d.trade_date, d.trade_date > t.trough_date and d.close_price >= t.peak_price),
+            toDate('1970-01-01')
+        ) as recovery_date
     from trough t
     inner join d on d.ticker_symbol = t.ticker_symbol
     group by t.ticker_symbol

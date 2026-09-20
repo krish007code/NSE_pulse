@@ -7,7 +7,7 @@ rolling as (
         asset_class,
         trade_date,
         close_price,
-                max(close_price) over (
+        min(close_price) over (
             partition by ticker_symbol 
             order by trade_date 
             rows between 251 preceding and current row

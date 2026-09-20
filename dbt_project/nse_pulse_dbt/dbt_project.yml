@@ -30,10 +30,18 @@ clean-targets:         # directories to be removed by `dbt clean`
 # files using the `{{ config(...) }}` macro.
 models:
   nse_pulse_dbt:
-    # Config indicated by + and applies to all files under models/example/
     staging:
       +materialized: view
     intermediate:
       +materialized: ephemeral
+      # int_pairs_corr uses a non-equi self-join (ticker_a < ticker_b).
+      # ClickHouse 24.1 rejects that condition when the model is inlined as a
+      # CTE-in-CTE (ephemeral), raising error 403 INVALID_JOIN_ON_EXPRESSION.
+      # Materialised as a view so the join runs against a named relation.
+      # Downstream: only two singular tests ref this model directly; the mart
+      # models (mart_correlated_pairs, mart_inverse_pairs) re-implement their
+      # own correlation joins inline and are unaffected.
+      int_pairs_corr:
+        +materialized: view
     marts:
       +materialized: table

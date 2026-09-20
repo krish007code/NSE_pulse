@@ -17,5 +17,5 @@ select
 from m
 where prev_avg_7 is not null
   and prev_avg_30 is not null
-  and prev_avg_7 <= prev_avg_30
+  and prev_avg_7 < prev_avg_30
   and avg_close_7d > avg_close_30d
