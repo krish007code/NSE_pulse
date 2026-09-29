@@ -4,7 +4,6 @@
 > extended with a Bluesky-sourced sentiment layer, backed by a 62-model dbt project with
 > 294 passing data tests that caught real bugs before they shipped.
 
-Optional badges — uncomment/edit once you confirm exact stack versions
 [![Python](https://img.shields.io/badge/Python-3.x-blue)]()
 [![Airflow](https://img.shields.io/badge/Airflow-2.9.2-red)]()
 [![dbt](https://img.shields.io/badge/dbt-62%20models-orange)]()
