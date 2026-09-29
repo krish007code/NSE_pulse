@@ -77,6 +77,8 @@ Ingestion, sentiment scoring, and loading are orchestrated as a single daily **A
 
 ### Mart models reference
 
+📊 [Live dbt docs & lineage graph](https://krish007code.github.io/NSE_pulse/)
+
 **`mart_daily_sentiment`** *(root)* — Aggregates Bluesky posts per ticker per day into avg sentiment score, sentiment volatility, positive/negative counts, post volume, and total engagement.
 
 ---
