@@ -8,7 +8,7 @@ dependencies = [
     "atproto>=0.0.71",
     "clickhouse-connect>=1.3.0",
     "cryptography>=49.0.0",
-    "dbt-clickhouse>=1.10.0",
+    "dbt-clickhouse==1.9.3",
     "minio>=7.2.20",
     "pathlib>=1.0.1",
     "polars>=1.41.2",

@@ -113,9 +113,7 @@ if __name__ == "__main__":
     except Exception as e:
         logger.exception(f"minio upload script failed due to error: {e}")
 
-    # NEW: run bluesky historical pull in the same script execution.
-    # Kept as a separate try/except so a bluesky failure (e.g. API/auth
-    # issue) doesn't hide whether the yfinance upload above succeeded.
+    # NEW bluesky part
     try:
         bluesky_one_time()
         logger.info("bluesky upload script successfull")

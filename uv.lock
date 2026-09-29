@@ -789,17 +789,17 @@ wheels = [
 
 [[package]]
 name = "dbt-clickhouse"
-version = "1.10.0"
+version = "1.9.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "clickhouse-connect" },
     { name = "clickhouse-driver" },
-    { name = "dbt-adapters" },
     { name = "dbt-core" },
+    { name = "setuptools" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/dd/4c/832da3bd5fb7be742c77b39b64e2506ac38c2d87fb4c67cd0323fc3248ce/dbt_clickhouse-1.10.0.tar.gz", hash = "sha256:65df64748e777dcb4361337fa2644e82895afe71577202ef0db4c25bd6fea51a", size = 52716, upload-time = "2026-02-16T12:14:59.976Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0e/5d/13f073114c9c5b8cb463020726e4d1e41163efb3940030b28066e744fc78/dbt_clickhouse-1.9.3.tar.gz", hash = "sha256:364a7f14df60f9bab5cc5f32c06a53048b6cd8a60f07b2925143aebfc0145ae9", size = 75687, upload-time = "2025-09-11T09:23:14.285Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/79/dc/cd420e85ee2e46ba0cc0741845a0ef1d426a4d3394bbd84a20796d98470b/dbt_clickhouse-1.10.0-py3-none-any.whl", hash = "sha256:a5df3e0ddc5fc1b361e40d0f9b80eaff8343a3f6c4beea55b8627ed358ae47cb", size = 67277, upload-time = "2026-02-16T12:14:58.976Z" },
+    { url = "https://files.pythonhosted.org/packages/27/d6/0ba26958a94506b844d99299e71f7ff7b1e80239cf4ecd52950bc63c9d27/dbt_clickhouse-1.9.3-py2.py3-none-any.whl", hash = "sha256:3c7808c28cc0e0380570b81d5f2a8b9c6f932e829599ad6f2c0750ef78e08c11", size = 70360, upload-time = "2025-09-11T09:23:12.961Z" },
 ]
 
 [[package]]
@@ -1741,7 +1741,7 @@ requires-dist = [
     { name = "atproto", specifier = ">=0.0.71" },
     { name = "clickhouse-connect", specifier = ">=1.3.0" },
     { name = "cryptography", specifier = ">=49.0.0" },
-    { name = "dbt-clickhouse", specifier = ">=1.10.0" },
+    { name = "dbt-clickhouse", specifier = "==1.9.3" },
     { name = "minio", specifier = ">=7.2.20" },
     { name = "pathlib", specifier = ">=1.0.1" },
     { name = "polars", specifier = ">=1.41.2" },
@@ -2708,6 +2708,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/e7/e3/54b496ac724e60e61cc3447f02690105901ca6d90da0377dffe49ff99fc7/setproctitle-1.3.7-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:1fae595d032b30dab4d659bece20debd202229fce12b55abab978b7f30783d73", size = 33958, upload-time = "2025-09-05T12:50:39.841Z" },
     { url = "https://files.pythonhosted.org/packages/ea/a8/c84bb045ebf8c6fdc7f7532319e86f8380d14bbd3084e6348df56bdfe6fd/setproctitle-1.3.7-cp314-cp314t-win32.whl", hash = "sha256:02432f26f5d1329ab22279ff863c83589894977063f59e6c4b4845804a08f8c2", size = 12745, upload-time = "2025-09-05T12:50:41.377Z" },
     { url = "https://files.pythonhosted.org/packages/08/b6/3a5a4f9952972791a9114ac01dfc123f0df79903577a3e0a7a404a695586/setproctitle-1.3.7-cp314-cp314t-win_amd64.whl", hash = "sha256:cbc388e3d86da1f766d8fc2e12682e446064c01cea9f88a88647cfe7c011de6a", size = 13469, upload-time = "2025-09-05T12:50:42.67Z" },
+]
+
+[[package]]
+name = "setuptools"
+version = "84.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/6d/44/f5da03a8ef95d369145c5bb53050e7877c9f3d312e128605fd9504829143/setuptools-84.0.0.tar.gz", hash = "sha256:f4695c21257f0d9b537ec2692c941d02ee143b7cc1276941349a546573b2ef73", size = 1168449, upload-time = "2026-08-08T18:27:58.365Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/95/9c/c510029fc6ef33a6275cd2c5d3cecd6613dfd6aa401d57c54f1c18852ccf/setuptools-84.0.0-py3-none-any.whl", hash = "sha256:51a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670", size = 818216, upload-time = "2026-08-08T18:27:56.719Z" },
 ]
 
 [[package]]

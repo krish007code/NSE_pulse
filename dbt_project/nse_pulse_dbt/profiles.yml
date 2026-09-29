@@ -3,9 +3,10 @@ nse_pulse_dbt:
   outputs:
     dev:
       type: clickhouse
-      driver: http               # Usually 'http' or 'native'
-      host: clickhouse           # Replace with your ClickHouse host IP/URL
+      driver: http
+      host: clickhouse           
       port: 8123                 
       user: "{{ env_var('CLICKHOUSE_USER') }}"
       password: "{{ env_var('CLICKHOUSE_PWD') }}"
-      schema: staging
+      schema: nse_pulse
+      staging_schema: nse_pulse
