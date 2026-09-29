@@ -88,7 +88,9 @@ services:
     command: sleep infinity
 
   minio:
-    image: minio/minio:latest
+    build:
+      context: .
+      dockerfile: dockerfile.minio
     container_name: minio
     command: server /data --console-address ":9001"
     environment:

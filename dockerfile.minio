@@ -1,0 +1,13 @@
+FROM golang:1.24-alpine AS builder
+
+WORKDIR /build
+RUN apk add --no-cache git make
+RUN git clone https://github.com/minio/minio.git .
+RUN CGO_ENABLED=0 go build -o /build/minio
+
+FROM alpine:latest
+WORKDIR /data
+COPY --from=builder /build/minio /usr/bin/minio
+
+EXPOSE 9000 9001
+ENTRYPOINT ["minio"]
