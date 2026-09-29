@@ -32,6 +32,7 @@ models:
   nse_pulse_dbt:
     staging:
       +materialized: view
+      +schema: staging
     intermediate:
       +materialized: ephemeral
       # int_pairs_corr uses a non-equi self-join (ticker_a < ticker_b).
@@ -45,3 +46,16 @@ models:
         +materialized: view
     marts:
       +materialized: table
+      +schema: mart_sentiment
+      technical:
+        +schema: mart_technical
+      volatility:
+        +schema: mart_volatility
+      returns:
+        +schema: mart_returns
+      portfolio:
+        +schema: mart_portfolio
+      advanced:
+        +schema: mart_advanced
+      data_quality:
+        +schema: mart_data_quality

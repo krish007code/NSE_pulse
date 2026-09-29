@@ -8,5 +8,4 @@ nse_pulse_dbt:
       port: 8123                 
       user: "{{ env_var('CLICKHOUSE_USER') }}"
       password: "{{ env_var('CLICKHOUSE_PWD') }}"
-      schema: default            
-      
+      schema: staging
