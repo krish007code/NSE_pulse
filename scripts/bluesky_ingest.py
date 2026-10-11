@@ -12,28 +12,41 @@ from atproto_client.exceptions import AtProtocolError
 
 project_root = Path(__file__).resolve().parent.parent
 sys.path.append(str(project_root))
+
 from utility.custom_logger import setup_logger
 
 log_directory = project_root / "utility/logs"
 logger = setup_logger(log_dir=log_directory)
 
 load_dotenv()
+
 config_path = project_root / "config.ini"
 config = configparser.ConfigParser(allow_no_value=True)
 config.read(config_path)
+
 logger.info("read config")
 
 BLUESKY_HANDLE = os.environ.get("BLUESKY_HANDLE")
 BLUESKY_APP_PASSWORD = os.environ.get("BLUESKY_APP_PASSWORD")
 
-now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+MAX_POSTS_PER_KEYWORD = config.getint(
+    "bluesky_settings", "max_posts_per_keyword", fallback=100
+)
+REQUEST_DELAY_SECONDS = config.getfloat(
+    "bluesky_settings", "request_delay_seconds", fallback=1.0
+)
+HISTORICAL_DAYS_BACK = config.getint(
+    "bluesky_settings", "historical_days_back", fallback=90
+)
 
-bluesky_tickers = config.get("bluesky_tickers", "holder")
-holder = [line.strip() for line in bluesky_tickers.split("\n") if line.strip()]
+bluesky_tickers = config.get("bluesky_tickers", "holder", fallback="")
+holder = [
+    line.strip()
+    for line in bluesky_tickers.splitlines()
+    if line.strip()
+]
+
 logger.info(f"found {len(holder)} bluesky tickers")
-
-MAX_POSTS_PER_KEYWORD = 100
-REQUEST_DELAY_SECONDS = 1.0
 
 FINANCE_CONTEXT_WORDS = {
     "stock", "share", "shares", "nse", "bse", "nifty", "sensex",
@@ -50,12 +63,18 @@ def looks_finance_relevant(text: str, symbol: str) -> bool:
 
 
 def keywords_for_symbol(symbol: str) -> list[str]:
-    return [f"${symbol}", f"{symbol} stock", f"{symbol} share", f"{symbol} results"]
+    return [
+        f"${symbol}",
+        f"{symbol} stock",
+        f"{symbol} share",
+        f"{symbol} results",
+    ]
 
 
 def post_to_record(post_view, ticker_symbol: str, matched_keyword: str) -> dict:
     record = post_view.record
     text = getattr(record, "text", "")
+
     return {
         "uri": post_view.uri,
         "cid": post_view.cid,
@@ -74,7 +93,13 @@ def post_to_record(post_view, ticker_symbol: str, matched_keyword: str) -> dict:
     }
 
 
-def search_keyword(client: Client, keyword: str, ticker_symbol: str, since_date: str, max_posts: int) -> list[dict]:
+def search_keyword(
+    client: Client,
+    keyword: str,
+    ticker_symbol: str,
+    since_date: str,
+    max_posts: int,
+) -> list[dict]:
     collected: list[dict] = []
     cursor = None
 
@@ -84,6 +109,7 @@ def search_keyword(client: Client, keyword: str, ticker_symbol: str, since_date:
             "limit": min(100, max_posts - len(collected)),
             "sort": "latest",
         }
+
         if since_date:
             params["since"] = since_date
         if cursor:
@@ -105,6 +131,7 @@ def search_keyword(client: Client, keyword: str, ticker_symbol: str, since_date:
         cursor = response.cursor
         if not cursor:
             break
+
         time.sleep(REQUEST_DELAY_SECONDS)
 
     return collected
@@ -113,31 +140,52 @@ def search_keyword(client: Client, keyword: str, ticker_symbol: str, since_date:
 def deduplicate(records: list[dict]) -> list[dict]:
     seen = set()
     unique = []
-    for r in records:
-        if r["uri"] not in seen:
-            seen.add(r["uri"])
-            unique.append(r)
+
+    for record in records:
+        if record["uri"] not in seen:
+            seen.add(record["uri"])
+            unique.append(record)
+
     return unique
 
 
 def collect_tickers(since_date: str | None) -> pl.DataFrame | None:
+    if not BLUESKY_HANDLE or not BLUESKY_APP_PASSWORD:
+        raise ValueError(
+            "Missing BLUESKY_HANDLE or BLUESKY_APP_PASSWORD in the environment."
+        )
+
+    if not holder:
+        logger.warning("no Bluesky tickers configured in config.ini")
+        return None
+
     client = Client()
     client.login(BLUESKY_HANDLE, BLUESKY_APP_PASSWORD)
     logger.info(f"logged in as {BLUESKY_HANDLE}")
 
     all_records = []
+
     for symbol in holder:
         logger.info(f"searching ticker: {symbol}")
         ticker_records = []
+
         for keyword in keywords_for_symbol(symbol):
-            results = search_keyword(client, keyword, symbol, since_date, MAX_POSTS_PER_KEYWORD)
+            results = search_keyword(
+                client=client,
+                keyword=keyword,
+                ticker_symbol=symbol,
+                since_date=since_date,
+                max_posts=MAX_POSTS_PER_KEYWORD,
+            )
             ticker_records.extend(results)
             time.sleep(REQUEST_DELAY_SECONDS)
+
         ticker_records = deduplicate(ticker_records)
         logger.info(f"{symbol}: {len(ticker_records)} unique posts")
         all_records.extend(ticker_records)
 
     all_records = deduplicate(all_records)
+
     if not all_records:
         logger.warning("no records collected")
         return None
@@ -145,22 +193,42 @@ def collect_tickers(since_date: str | None) -> pl.DataFrame | None:
     return pl.DataFrame(all_records)
 
 
-def historical_load(days_back: int = 90) -> pl.DataFrame | None:
-    # note: Bluesky search doesn't reliably index a full year back --
-    # 90 days is a more realistic ceiling to actually get results
+def historical_load(days_back: int = HISTORICAL_DAYS_BACK) -> pl.DataFrame | None:
     logger.info("started bluesky historical_load")
-    since_date = (datetime.now(timezone.utc) - timedelta(days=days_back)).isoformat()
+    since_date = (
+        datetime.now(timezone.utc) - timedelta(days=days_back)
+    ).isoformat()
     return collect_tickers(since_date)
 
 
 def daily_load() -> pl.DataFrame | None:
     logger.info("started bluesky daily_load")
-    since_date = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+    since_date = (
+        datetime.now(timezone.utc) - timedelta(days=1)
+    ).isoformat()
     return collect_tickers(since_date)
 
-if __name__ == "__main__":
+
+def main() -> None:
+    logger.info("starting Bluesky historical ingestion")
+
     try:
-        historical_load()
-        logger.info("bluesky ingestion successful")
-    except Exception as e:
-        logger.exception(f"bluesky script failed: {e}")
+        df = historical_load()
+
+        if df is None or df.is_empty():
+            logger.warning(
+                "Bluesky historical ingestion completed with no records"
+            )
+            return
+
+        logger.info(
+            f"Bluesky historical ingestion successful: "
+            f"{df.height} rows, {df.width} columns"
+        )
+    except Exception:
+        logger.exception("Bluesky historical ingestion failed")
+        raise
+
+
+if __name__ == "__main__":
+    main()

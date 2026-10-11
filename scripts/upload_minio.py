@@ -10,9 +10,10 @@ import socket
 
 from ingest import one_time_load, daily_load
 from bluesky_ingest import historical_load as bluesky_historical_load, daily_load as bluesky_daily_load
+from sentiment_score import once as sentiment_once
 import configparser
 
-
+# setting logger and config files##################################################
 project_root = Path(__file__).resolve().parent.parent
 
 sys.path.append(str(project_root))
@@ -32,7 +33,7 @@ load_dotenv()
 MINIO_USER = os.environ.get("MINIO_USER")
 MINIO_PASS = os.environ.get("MINIO_PWD")
 bucket = config.get("minio", "bucket")
-
+###################################################################################
 
 def get_working_host(host):
     try:
@@ -73,7 +74,7 @@ def upload_dataframe_to_minio(df, object_name, host):
 
 def daily():
     logger.info("started daily")
-    object_name = f'config.get("data", "daily")_{now}.parquet'
+    object_name = f"{config.get('data', 'daily')}_{now}.parquet"
     host = get_working_host("localhost:9000")
     ensure_bucket_exists(host)
     upload_dataframe_to_minio(daily_load(), object_name=object_name, host=host)
@@ -105,17 +106,21 @@ def bluesky_one_time():
     upload_dataframe_to_minio(bluesky_historical_load(), object_name=object_name, host=host)
     logger.info("finish bluesky one_time")
 
-
 if __name__ == "__main__":
     try:
         one_time()
-        logger.info("minio upload script successfull")
+        logger.info("MinIO upload script successful")
     except Exception as e:
-        logger.exception(f"minio upload script failed due to error: {e}")
+        logger.exception(f"MinIO upload script failed: {e}")
 
-    # NEW bluesky part
     try:
         bluesky_one_time()
-        logger.info("bluesky upload script successfull")
+        logger.info("Bluesky upload script successful")
     except Exception as e:
-        logger.exception(f"bluesky upload script failed due to error: {e}")
+        logger.exception(f"Bluesky upload script failed: {e}")
+
+    try:
+        sentiment_once()
+        logger.info("Sentiment scoring script successful")
+    except Exception as e:
+        logger.exception(f"Sentiment scoring script failed: {e}")

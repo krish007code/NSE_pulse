@@ -1,27 +1,27 @@
 import polars as pl
 import yfinance as yf
-
 from tqdm import tqdm
 from datetime import datetime, timezone
-
 import configparser
 import sys
 from pathlib import Path
 
-project_root = Path(__file__).resolve().parent.parent  #
-sys.path.append(str(project_root))  #
+
+# logger and config files setup  below #########################################
+project_root = Path(__file__).resolve().parent.parent
+sys.path.append(str(project_root))
 from utility.custom_logger import setup_logger
 
-log_directory = project_root / "utility/logs"  #
-logger = setup_logger(log_dir=log_directory)  #
+log_directory = project_root / "utility/logs"
+logger = setup_logger(log_dir=log_directory)
 
-now = datetime.now(timezone.utc).strftime("%Y-%m-%d")  #
+now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 config_path = project_root / "config.ini"
 config = configparser.ConfigParser(allow_no_value=True)
 config.read(config_path)
 logger.info("red config")
-
+################################################################################
 
 def get_asset_class(ticker):
     if ticker.endswith(".NS"):
@@ -56,7 +56,7 @@ def data_from_yfinance(time):
             continue
 
         dat.index = dat.index.tz_convert("UTC")
-        dat = dat.reset_index()  # for date
+        dat = dat.reset_index()
 
         df = pl.from_pandas(dat)
         df = df.with_columns(
