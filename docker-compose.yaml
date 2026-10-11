@@ -45,7 +45,7 @@ services:
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PWD}
     ports:
       - "${CLICKHOUSE_HTTP_PORT:-8123}:8123"
-      - "9005:9000"
+      - "${CLICKHOUSE_NATIVE_PORT:-9005}:9000"
     volumes:
       - clickhouse_data:/var/lib/clickhouse
     ulimits:
@@ -62,7 +62,7 @@ services:
       - ./backend:/app
       - ./utility:/app/utility
     ports:
-      - "8000:8000"
+      - "${FASTAPI_PORT:-8000}:8000"
     env_file: .env
     environment:
       CLICKHOUSE_HOST: ${CLICKHOUSE_HOST:-clickhouse}
@@ -100,14 +100,14 @@ services:
       - minio_data:/data
     networks: *app-networks
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
 
   airflow-init:
     <<: *airflow-common
     container_name: airflow-init
     command: >
-      bash -c " airflow db migrate && airflow users create --username ${AIRFLOW_USER} --password ${AIRFLOW_PWD} --firstname ${AIRFLOW_FIRSTNAME} --lastname ${AIRFLOW_LASTNAME} --role ${AIRFLOW_ROLE} --email ${AIRFLOW_EMAIL} "
+      bash -c "airflow db migrate && airflow users create --username ${AIRFLOW_USER} --password ${AIRFLOW_PWD} --firstname ${AIRFLOW_FIRSTNAME} --lastname ${AIRFLOW_LASTNAME} --role ${AIRFLOW_ROLE} --email ${AIRFLOW_EMAIL}"
 
   webserver:
     <<: *airflow-common
@@ -118,7 +118,7 @@ services:
       - ./scripts:/opt/airflow/scripts
       - ./dbt_project:/opt/airflow/dbt_project
     ports:
-      - "8080:8080"
+      - "${AIRFLOW_PORT:-8080}:8080"
     depends_on:
       postgres:
         condition: service_started
@@ -143,7 +143,7 @@ services:
     image: metabase/metabase:latest
     container_name: metabase
     ports:
-      - "3000:3000"
+      - "${METABASE_PORT:-3000}:3000"
     networks: *app-networks
     depends_on:
       - clickhouse

@@ -8,3 +8,6 @@ pathlib
 loguru
 atproto
 vaderSentiment
+psutil
+python-dotenv
+rich
